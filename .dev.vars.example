@@ -1,0 +1,3 @@
+# Local dev overrides (copiar a .dev.vars con valores reales; no se sube a git)
+IMPORT_CSV_URL=http://127.0.0.1:8788/data/sample.csv
+IMPORT_SECRET=dev-secret
