@@ -1,0 +1,21 @@
+{
+	"$schema": "./node_modules/wrangler/config-schema.json",
+	"compatibility_date": "2026-09-11",
+	"compatibility_flags": ["global_fetch_strictly_public"],
+	"name": "lle-pwa",
+	"main": "@astrojs/cloudflare/entrypoints/server",
+	"assets": {
+		"directory": "./dist",
+		"binding": "ASSETS"
+	},
+	"d1_databases": [
+		{
+			"binding": "lle_pwa",
+			"database_name": "lle-pwa",
+			"database_id": "dc3dc314-c508-4a76-b919-6f92f86f891d"
+		}
+	],
+	"observability": {
+		"enabled": true
+	}
+}
