@@ -1,1 +1,24 @@
 @import "tailwindcss";
+
+@keyframes row-in {
+	from { opacity: 0; transform: translateY(-4px); }
+	to   { opacity: 1; transform: none; }
+}
+
+[data-animate-rows] tbody tr {
+	animation: row-in 0.35s ease both;
+}
+
+th[data-sort] {
+	cursor: pointer;
+	user-select: none;
+}
+th[data-sort]::after {
+	content: '';
+}
+th[data-sort].sorted-asc::after {
+	content: ' ↑';
+}
+th[data-sort].sorted-desc::after {
+	content: ' ↓';
+}

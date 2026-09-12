@@ -1,0 +1,91 @@
+---
+const pathname = Astro.url.pathname;
+const links = [
+	{ href: '/', label: 'Inicio' },
+	{ href: '/clasificacion', label: 'Clasificación' },
+	{ href: '/calendario', label: 'Calendario' },
+	{ href: '/equipos', label: 'Equipos' },
+	{ href: '/jugadores', label: 'Jugadores' },
+];
+const isActive = (href: string) =>
+	href === '/' ? pathname === '/' : pathname.startsWith(href);
+---
+
+<header class="sticky top-0 z-20 border-b border-gray-800 bg-gray-900 text-white shadow-md">
+	<div class="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3">
+		<a href="/" class="flex items-center gap-2.5 font-bold tracking-tight">
+			<span
+				class="grid h-8 w-8 place-items-center rounded-xl bg-orange-500 text-xs font-black"
+			>LL</span>
+			<span class="text-sm sm:text-base">Liga Local</span>
+		</a>
+
+		<nav class="hidden items-center gap-1 md:flex">
+			{
+				links.map((l) => (
+					<a
+						href={l.href}
+						aria-current={isActive(l.href) ? 'page' : undefined}
+						class={
+							isActive(l.href)
+								? 'rounded-lg bg-white/10 px-3 py-1.5 text-sm font-medium text-white'
+								: 'rounded-lg px-3 py-1.5 text-sm text-gray-300 transition-colors hover:bg-white/10 hover:text-white'
+						}
+					>
+						{l.label}
+					</a>
+				))
+			}
+		</nav>
+
+		<details class="relative md:hidden" data-mobile-menu>
+			<summary
+				class="flex cursor-pointer list-none items-center rounded-lg p-2 transition-colors hover:bg-white/10 [&::-webkit-details-marker]:hidden"
+			>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					width="22"
+					height="22"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+				>
+					<path d="M4 6h16M4 12h16M4 18h16"></path>
+				</svg>
+			</summary>
+			<div
+				class="absolute right-0 top-12 flex w-44 flex-col rounded-xl border border-gray-700 bg-gray-900 p-1.5 shadow-xl"
+			>
+				{
+					links.map((l) => (
+						<a
+							href={l.href}
+							class={
+								isActive(l.href)
+									? 'rounded-lg bg-white/10 px-3 py-2 text-sm font-medium text-white'
+									: 'rounded-lg px-3 py-2 text-sm text-gray-300 transition-colors hover:bg-white/10 hover:text-white'
+							}
+						>
+							{l.label}
+						</a>
+					))
+				}
+			</div>
+		</details>
+	</div>
+</header>
+
+<script>
+	const menu = document.querySelector<HTMLDetailsElement>(
+		'[data-mobile-menu]',
+	);
+	menu
+		?.querySelectorAll('a')
+		.forEach((a) =>
+			a.addEventListener('click', () => {
+				if (menu) menu.open = false;
+			}),
+		);
+</script>

@@ -1,0 +1,112 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getStandings } from '../lib/db';
+
+const standings = await getStandings();
+
+const cols = [
+	{ label: 'Equipo', align: 'text-left' },
+	{ label: 'PJ', align: 'text-right' },
+	{ label: 'G', align: 'text-right' },
+	{ label: 'P', align: 'text-right' },
+	{ label: 'PF', align: 'text-right' },
+	{ label: 'PC', align: 'text-right' },
+	{ label: 'Dif', align: 'text-right' },
+];
+---
+
+<Layout title="Clasificación · Liga Local de Baloncesto">
+	<div class="mx-auto max-w-5xl px-4 py-8">
+		<h1 class="text-2xl font-bold tracking-tight">Clasificación</h1>
+
+		{
+			standings.length === 0 ? (
+				<div
+					class="mt-6 rounded-xl border border-dashed border-gray-300 bg-white p-8 text-center text-gray-500"
+				>
+					Aún no hay datos de clasificación.
+				</div>
+			) : (
+				<div class="mt-4 overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
+					<table
+						data-sortable
+						data-animate-rows
+						class="w-full min-w-150 text-sm"
+					>
+						<thead>
+							<tr
+								class="border-b border-gray-200 text-left text-xs uppercase tracking-wide text-gray-500"
+							>
+								<th class="w-12 px-3 py-3 font-medium">#</th>
+								{
+									cols.map((c, i) => (
+										<th
+											data-sort
+											class={[
+												'whitespace-nowrap px-3 py-3 font-medium',
+												i === 0 ? 'text-left' : 'text-right',
+											].join(' ')}
+										>
+											{c.label}
+										</th>
+									))
+								}
+							</tr>
+						</thead>
+						<tbody>
+							{
+								standings.map((r) => (
+									<tr
+										class="border-b border-gray-100 transition-colors last:border-0 hover:bg-orange-50"
+										data-col0={r.name}
+										data-col1={r.played}
+										data-col2={r.wins}
+										data-col3={r.losses}
+										data-col4={r.points_for}
+										data-col5={r.points_against}
+										data-col6={r.diff}
+									>
+										<td class="px-3 py-2.5 font-semibold text-gray-400">
+											<span data-pos>{r.position}</span>
+										</td>
+										<td class="px-3 py-2.5 font-medium">
+											<a
+												href={`/equipos/${r.id}`}
+												class="text-gray-900 hover:text-orange-600 hover:underline"
+											>
+												{r.name}
+											</a>
+										</td>
+										<td class="px-3 py-2.5 text-right tabular-nums">{r.played}</td>
+										<td class="px-3 py-2.5 text-right tabular-nums text-emerald-600">
+											{r.wins}
+										</td>
+										<td class="px-3 py-2.5 text-right tabular-nums text-rose-600">
+											{r.losses}
+										</td>
+										<td class="px-3 py-2.5 text-right tabular-nums">{r.points_for}</td>
+										<td class="px-3 py-2.5 text-right tabular-nums">
+											{r.points_against}
+										</td>
+										<td
+											class={[
+												'px-3 py-2.5 text-right font-medium tabular-nums',
+												r.diff >= 0 ? 'text-gray-900' : 'text-gray-500',
+											].join(' ')}
+										>
+											{r.diff >= 0 ? `+${r.diff}` : r.diff}
+										</td>
+									</tr>
+								))
+							}
+						</tbody>
+					</table>
+				</div>
+			)
+		}
+	</div>
+</Layout>
+
+<script>
+	import '../lib/table-interactions';
+</script>

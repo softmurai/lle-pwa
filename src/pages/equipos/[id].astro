@@ -1,0 +1,174 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getTeam, getRoster } from '../../lib/db';
+
+const id = Number(Astro.params.id);
+const team = Number.isNaN(id) ? null : await getTeam(id);
+const roster = team ? await getRoster(id) : [];
+if (!team) Astro.response.status = 404;
+
+const colors = [
+	'bg-orange-500',
+	'bg-blue-500',
+	'bg-emerald-600',
+	'bg-purple-600',
+	'bg-rose-500',
+	'bg-teal-600',
+	'bg-amber-600',
+	'bg-cyan-600',
+	'bg-pink-600',
+];
+const colorFor = (name: string) =>
+	colors[[...name].reduce((a, c) => a + c.charCodeAt(0), 0) % colors.length];
+
+const statColumns = [
+	{ label: 'Nombre' },
+	{ label: 'Dorsal', align: 'text-right' },
+	{ label: 'PJ', align: 'text-right' },
+	{ label: 'Puntos', align: 'text-right' },
+	{ label: 'Pts/PJ', align: 'text-right' },
+	{ label: '2P', align: 'text-right' },
+	{ label: '3P', align: 'text-right' },
+	{ label: 'TL%', align: 'text-right' },
+	{ label: 'Faltas', align: 'text-right' },
+];
+---
+
+<Layout
+	title={
+		team
+			? `${team.name} · Liga Local de Baloncesto`
+			: 'Equipo · Liga Local de Baloncesto'
+	}
+>
+	{
+		team ? (
+			<div class="mx-auto max-w-5xl px-4 py-8">
+				<div class="flex items-center gap-3">
+					<span
+						class={[
+							'grid h-12 w-12 place-items-center rounded-xl text-base font-bold text-white',
+							colorFor(team.name),
+						].join(' ')}
+					>
+						{team.short_name.toUpperCase()}
+					</span>
+					<div>
+						<h1 class="text-2xl font-bold tracking-tight">{team.name}</h1>
+						<p class="text-sm text-gray-500">
+							{team.wins} victorias · {team.losses} derrotas · {team.played}{' '}
+							{team.played === 1 ? 'partido' : 'partidos'}
+						</p>
+					</div>
+				</div>
+				<p class="mt-2">
+					<a
+						href="/equipos"
+						class="text-sm font-medium text-orange-600 hover:underline"
+					>
+						← Todos los equipos
+					</a>
+				</p>
+
+				<div class="mt-6">
+					<input
+						data-filter-for="#roster-table"
+						type="search"
+						placeholder="Buscar por nombre o dorsal…"
+						class="w-full max-w-md rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm shadow-sm outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
+					/>
+				</div>
+
+				{roster.length === 0 ? (
+					<div
+						class="mt-4 rounded-xl border border-dashed border-gray-300 bg-white p-8 text-center text-gray-500"
+					>
+						Este equipo aún no tiene jugadores registrados.
+					</div>
+				) : (
+					<div class="mt-4 overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
+						<table
+							data-sortable
+							data-animate-rows
+							id="roster-table"
+							class="w-full min-w-180 text-sm"
+						>
+							<thead>
+								<tr
+									class="border-b border-gray-200 text-left text-xs uppercase tracking-wide text-gray-500"
+								>
+									{
+										statColumns.map((c, i) => (
+											<th
+												data-sort
+												class={[
+													'whitespace-nowrap px-3 py-3 font-medium',
+													i === 0 ? 'text-left' : 'text-right',
+												].join(' ')}
+											>
+												{c.label}
+											</th>
+										))
+									}
+								</tr>
+							</thead>
+							<tbody>
+								{
+									roster.map((p) => (
+										<tr
+											class="border-b border-gray-100 transition-colors last:border-0 hover:bg-orange-50"
+											data-search={`${p.name} ${p.number ?? ''}`}
+											data-col0={p.name}
+											data-col1={p.number ?? ''}
+											data-col2={p.games}
+											data-col3={p.points}
+											data-col4={p.avg_points ?? ''}
+											data-col5={p.fg_made}
+											data-col6={p.three_made}
+											data-col7={p.ft_pct ?? ''}
+											data-col8={p.fouls}
+										>
+											<td class="px-3 py-2.5 font-medium">{p.name}</td>
+											<td class="px-3 py-2.5 text-right tabular-nums text-gray-500">
+												{p.number ?? '–'}
+											</td>
+											<td class="px-3 py-2.5 text-right tabular-nums">{p.games}</td>
+											<td class="px-3 py-2.5 text-right font-medium tabular-nums">
+												{p.points}
+											</td>
+											<td class="px-3 py-2.5 text-right tabular-nums">
+												{p.avg_points !== null ? p.avg_points : '–'}
+											</td>
+											<td class="px-3 py-2.5 text-right tabular-nums">
+												{p.fg_made}
+											</td>
+											<td class="px-3 py-2.5 text-right tabular-nums">
+												{p.three_made}
+											</td>
+											<td class="px-3 py-2.5 text-right tabular-nums">
+												{p.ft_pct !== null ? p.ft_pct : '–'}
+											</td>
+											<td class="px-3 py-2.5 text-right tabular-nums">{p.fouls}</td>
+										</tr>
+									))
+								}
+							</tbody>
+						</table>
+					</div>
+				)}
+			</div>
+		) : (
+			<div class="mx-auto max-w-5xl px-4 py-8">
+				<div
+					class="rounded-xl border border-dashed border-gray-300 bg-white p-8 text-center text-gray-500"
+				>
+					Equipo no encontrado.
+				</div>
+			</div>
+		)
+	}
+</Layout>
+
+<script>
+	import '../../lib/table-interactions';
+</script>
