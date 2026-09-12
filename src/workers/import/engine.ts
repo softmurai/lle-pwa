@@ -1,7 +1,7 @@
 // Motor de importación: CSV (hoja de cálculo publicada) -> validación -> upsert en D1.
 // Formato CSV esperado (una fila por jugador y partido):
 //   week,date,home_team,away_team,home_score,away_score,status,
-//   team,player,number,points,rebounds,assists,steals,blocks,turnovers,fouls,2pm,3pm,ftm,fta
+//   team,player,number,points,2pm,3pm,ftm,fta,fouls
 
 export interface ImportEnv {
   lle_pwa: D1Database;
@@ -22,8 +22,7 @@ export interface ImportReport {
 
 const REQUIRED_HEADERS = [
   'week', 'date', 'home_team', 'away_team', 'home_score', 'away_score', 'status',
-  'team', 'player', 'number', 'points', 'rebounds', 'assists', 'steals',
-  'blocks', 'turnovers', 'fouls', '2pm', '3pm', 'ftm', 'fta',
+  'team', 'player', 'number', 'points', '2pm', '3pm', 'ftm', 'fta', 'fouls',
 ];
 
 export function parseCsv(text: string): string[][] {
@@ -153,7 +152,7 @@ export async function runImport(db: D1Database, csvText: string): Promise<Import
       continue;
     }
     const stats: Record<string, number> = {};
-    for (const col of ['points', 'rebounds', 'assists', 'steals', 'blocks', 'turnovers', 'fouls', '2pm', '3pm', 'ftm', 'fta']) {
+    for (const col of ['points', '2pm', '3pm', 'ftm', 'fta', 'fouls']) {
       const v = parseInt(get(col), 10);
       stats[col] = Number.isNaN(v) ? 0 : v;
     }
@@ -173,16 +172,15 @@ export async function runImport(db: D1Database, csvText: string): Promise<Import
 
     const res = await db
       .prepare(
-        `INSERT INTO match_stats (match_id, player_id, points, rebounds, assists, steals, blocks, turnovers, fouls, field_goals_made, three_pt_made, free_throws_made, free_throws_attempted)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `INSERT INTO match_stats (match_id, player_id, points, fouls, field_goals_made, three_pt_made, free_throws_made, free_throws_attempted)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
          ON CONFLICT(match_id, player_id) DO UPDATE SET
-           points = excluded.points, rebounds = excluded.rebounds, assists = excluded.assists,
-           steals = excluded.steals, blocks = excluded.blocks, turnovers = excluded.turnovers,
-           fouls = excluded.fouls, field_goals_made = excluded.field_goals_made,
+           points = excluded.points, fouls = excluded.fouls,
+           field_goals_made = excluded.field_goals_made,
            three_pt_made = excluded.three_pt_made, free_throws_made = excluded.free_throws_made,
            free_throws_attempted = excluded.free_throws_attempted`
       )
-      .bind(match, player, stats['points'], stats['rebounds'], stats['assists'], stats['steals'], stats['blocks'], stats['turnovers'], stats['fouls'], stats['2pm'], stats['3pm'], stats['ftm'], stats['fta'])
+      .bind(match, player, stats['points'], stats['fouls'], stats['2pm'], stats['3pm'], stats['ftm'], stats['fta'])
       .run();
     if (res.meta.changes > 0) report.matchStats += 1;
   }
