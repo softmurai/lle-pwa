@@ -2,7 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 import type { BoxScoreRow } from '../../lib/db';
 import { getMatch, getMatchBoxScore } from '../../lib/db';
-import { formatDate } from '../../lib/format';
+import { formatDate, formatTime } from '../../lib/format';
 
 const rawId = Number(Astro.params.id);
 const match = Number.isNaN(rawId) ? null : await getMatch(rawId);
@@ -61,7 +61,7 @@ const boxColumns = [
 						Jornada {match.week}
 					</span>
 					<span>·</span>
-					<span>{formatDate(match.date)}</span>
+					<span>{formatTime(match.time) || formatDate(match.date)}</span>
 					{match.status !== 'finished' && (
 						<span class="rounded bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
 							{match.status.toUpperCase()}

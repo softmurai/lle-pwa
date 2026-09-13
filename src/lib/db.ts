@@ -11,6 +11,17 @@ export interface StandingRow {
 	points_for: number;
 	points_against: number;
 	diff: number;
+	points: number;
+	form: boolean[];
+}
+
+export interface FormMatchRow {
+	home_team_id: number;
+	away_team_id: number;
+	home_score: number | null;
+	away_score: number | null;
+	status: string;
+	forfeit_team_id: number | null;
 }
 
 export async function getStandings(limit = 0): Promise<StandingRow[]> {
@@ -18,20 +29,42 @@ export async function getStandings(limit = 0): Promise<StandingRow[]> {
 	const res = await env.lle_pwa
 		.prepare(
 			`SELECT t.id, t.name, t.short_name, s.played, s.wins, s.losses,
-			        s.points_for, s.points_against,
+			        s.points_for, s.points_against, s.points,
 			        (s.points_for - s.points_against) AS diff
 			 FROM standings s
 			 JOIN teams t ON t.id = s.team_id
-			 ORDER BY s.wins DESC, diff DESC, s.points_for DESC
+			 ORDER BY s.points DESC, diff DESC, s.points_for DESC
 			 ${limitClause}`,
 		)
 		.all();
-	return (res.results as Omit<StandingRow, 'position'>[]).map((r, i) => ({
+
+	const mres = await env.lle_pwa
+		.prepare(
+			`SELECT m.home_team_id, m.away_team_id, m.home_score, m.away_score,
+			        m.status, m.forfeit_team_id
+			 FROM matches m
+			 WHERE m.status IN ('finished', 'forfeit')
+			 ORDER BY m.date ASC, m.week ASC`,
+		)
+		.all();
+
+	const byTeam = new Map<number, boolean[]>();
+	for (const m of mres.results as unknown as FormMatchRow[]) {
+		const forfeit = m.status === 'forfeit';
+		const homeWin = forfeit ? m.forfeit_team_id !== m.home_team_id : (m.home_score ?? 0) > (m.away_score ?? 0);
+		const awayWin = forfeit ? m.forfeit_team_id !== m.away_team_id : (m.away_score ?? 0) > (m.home_score ?? 0);
+		byTeam.set(m.home_team_id, [...(byTeam.get(m.home_team_id) ?? []), homeWin]);
+		byTeam.set(m.away_team_id, [...(byTeam.get(m.away_team_id) ?? []), awayWin]);
+	}
+
+	return (res.results as Omit<StandingRow, 'position' | 'form'>[]).map((r, i) => ({
 		...r,
 		position: i + 1,
 		points_for: Number(r.points_for),
 		points_against: Number(r.points_against),
 		diff: Number(r.diff),
+		points: Number(r.points),
+		form: (byTeam.get(r.id) ?? []).slice(-5),
 	}));
 }
 
@@ -39,6 +72,7 @@ export interface MatchRow {
 	id: number;
 	week: number;
 	date: string;
+	time: string | null;
 	home_score: number | null;
 	away_score: number | null;
 	status: string;
@@ -51,7 +85,7 @@ export interface MatchRow {
 async function matchesQuery(where = '', orderBy = '', bind: unknown[] = []): Promise<MatchRow[]> {
 	const res = await env.lle_pwa
 		.prepare(
-			`SELECT m.id, m.week, m.date, m.home_score, m.away_score, m.status,
+			`SELECT m.id, m.week, m.date, m.time, m.home_score, m.away_score, m.status,
 			        ht.name AS home_team, ht.short_name AS home_short,
 			        at.name AS away_team, at.short_name AS away_short
 			 FROM matches m
@@ -66,7 +100,7 @@ async function matchesQuery(where = '', orderBy = '', bind: unknown[] = []): Pro
 }
 
 export function getWeekMatches(week: number): Promise<MatchRow[]> {
-	return matchesQuery('WHERE m.week = ?', 'ORDER BY m.date ASC', [week]);
+	return matchesQuery('WHERE m.week = ?', 'ORDER BY m.time ASC, m.date ASC', [week]);
 }
 
 export function getAllMatches(): Promise<MatchRow[]> {
@@ -192,6 +226,7 @@ export interface MatchDetail {
 	id: number;
 	week: number;
 	date: string;
+	time: string | null;
 	home_score: number | null;
 	away_score: number | null;
 	status: string;
@@ -206,7 +241,7 @@ export interface MatchDetail {
 export async function getMatch(id: number): Promise<MatchDetail | null> {
 	const row = (await env.lle_pwa
 		.prepare(
-			`SELECT m.id, m.week, m.date, m.home_score, m.away_score, m.status,
+			`SELECT m.id, m.week, m.date, m.time, m.home_score, m.away_score, m.status,
 			        ht.id AS home_id, ht.name AS home_team, ht.short_name AS home_short,
 			        at.id AS away_id, at.name AS away_team, at.short_name AS away_short
 			 FROM matches m

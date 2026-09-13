@@ -1,0 +1,5 @@
+-- Migration number: 0004 	 2026-09-14T00:00:00.000Z
+
+ALTER TABLE matches ADD COLUMN time TEXT;
+ALTER TABLE matches ADD COLUMN forfeit_team_id INTEGER;
+ALTER TABLE standings ADD COLUMN points INTEGER NOT NULL DEFAULT 0;

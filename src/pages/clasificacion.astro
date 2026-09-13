@@ -12,6 +12,7 @@ const cols = [
 	{ label: 'PF', align: 'text-right' },
 	{ label: 'PC', align: 'text-right' },
 	{ label: 'Dif', align: 'text-right' },
+	{ label: 'PTS', align: 'text-right' },
 ];
 ---
 
@@ -54,6 +55,9 @@ const cols = [
 										</th>
 									))
 								}
+								<th class="whitespace-nowrap px-3 py-3 text-right font-medium">
+									RACHA
+								</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -68,6 +72,7 @@ const cols = [
 										data-col4={r.points_for}
 										data-col5={r.points_against}
 										data-col6={r.diff}
+										data-col7={r.points}
 									>
 										<td class="px-3 py-2.5 font-semibold text-gray-400">
 											<span data-pos>{r.position}</span>
@@ -94,10 +99,40 @@ const cols = [
 										<td
 											class={[
 												'px-3 py-2.5 text-right font-medium tabular-nums',
-												r.diff >= 0 ? 'text-gray-900' : 'text-gray-500',
+												r.diff > 0
+													? 'text-emerald-600'
+													: r.diff < 0
+														? 'text-rose-600'
+														: 'text-gray-500',
 											].join(' ')}
 										>
-											{r.diff >= 0 ? `+${r.diff}` : r.diff}
+											{r.diff > 0 ? `+${r.diff}` : r.diff}
+										</td>
+										<td class="px-3 py-2.5 text-right font-semibold tabular-nums">
+											{r.points}
+										</td>
+										<td class="px-3 py-2.5 text-right">
+											<span class="inline-flex justify-end gap-1">
+												{
+													Array.from({ length: 5 }, (_, i) => {
+														const res = r.form[i];
+														const cls =
+															res === undefined
+																? 'bg-gray-200'
+																: res
+																	? 'bg-emerald-500'
+																	: 'bg-rose-500';
+														return (
+															<span
+																class={[
+																	'inline-block h-2 w-2 rounded-full',
+																	cls,
+																].join(' ')}
+															></span>
+														);
+													})
+												}
+											</span>
 										</td>
 									</tr>
 								))

@@ -7,14 +7,21 @@ const MIGRATIONS = [
 	'migrations/0001_create_schema.sql',
 	'migrations/0002_drop_unused_stat_columns.sql',
 	'migrations/0003_drop_remaining_unused_stat_columns.sql',
+	'migrations/0004_add_match_time_points.sql',
 ];
 
 const VALID_CSV = [
-	'week,date,home_team,away_team,home_score,away_score,status,team,player,number,points,2pm,3pm,ftm,fta,fouls',
-	'1,2026-09-19,Cebras,Vikingos,81,78,finished,Cebras,Dani Moreno,4,5,1,1,0,1,5',
-	'1,2026-09-19,Cebras,Vikingos,81,78,finished,Cebras,Pau Ruiz,5,6,0,1,3,3,1',
-	'1,2026-09-19,Cebras,Vikingos,81,78,finished,Vikingos,Alex Serrano,7,12,3,2,0,2,4',
-	'1,2026-09-19,Cebras,Vikingos,81,78,finished,Vikingos,Marc Vidal,9,9,2,1,2,2,3',
+	'week,date,time,home_team,away_team,home_score,away_score,status,team,player,number,points,2pm,3pm,ftm,fta,fouls',
+	'1,2026-09-19,08:30,Cebras,Vikingos,81,78,finished,Cebras,Dani Moreno,4,5,1,1,0,1,5',
+	'1,2026-09-19,08:30,Cebras,Vikingos,81,78,finished,Cebras,Pau Ruiz,5,6,0,1,3,3,1',
+	'1,2026-09-19,08:30,Cebras,Vikingos,81,78,finished,Vikingos,Alex Serrano,7,12,3,2,0,2,4',
+	'1,2026-09-19,08:30,Cebras,Vikingos,81,78,finished,Vikingos,Marc Vidal,9,9,2,1,2,2,3',
+].join('\n');
+
+const FORFEIT_CSV = [
+	'week,date,time,home_team,away_team,home_score,away_score,status,team,player,number,points,2pm,3pm,ftm,fta,fouls,forfeit_team',
+	'1,2026-09-19,08:30,Cebras,Vikingos,81,0,finished,Cebras,Dani Moreno,4,5,1,1,0,1,5,',
+	'1,2026-09-19,08:30,Cebras,Vikingos,81,0,finished,Vikingos,Alex Serrano,7,12,3,2,0,2,4,Vikingos',
 ].join('\n');
 
 interface D1Result {
@@ -117,21 +124,29 @@ describe('runImport', () => {
 				losses: number;
 				points_for: number;
 				points_against: number;
+				points: number;
 			}>();
 		expect(cebras?.played).toBe(1);
 		expect(cebras?.wins).toBe(1);
 		expect(cebras?.losses).toBe(0);
 		expect(cebras?.points_for).toBe(81);
 		expect(cebras?.points_against).toBe(78);
+		expect(cebras?.points).toBe(2);
 
 		const vikingos = db
 			.prepare(
 				`SELECT s.* FROM standings s JOIN teams t ON t.id = s.team_id WHERE t.name = 'Vikingos'`,
 			)
-			.first<{ wins: number; losses: number; points_for: number }>();
+			.first<{ wins: number; losses: number; points_for: number; points: number }>();
 		expect(vikingos?.wins).toBe(0);
 		expect(vikingos?.losses).toBe(1);
 		expect(vikingos?.points_for).toBe(78);
+		expect(vikingos?.points).toBe(1);
+
+		const time = db
+			.prepare(`SELECT time FROM matches LIMIT 1`)
+			.first<{ time: string }>();
+		expect(time?.time).toBe('08:30');
 	});
 
 	it('re-importar el mismo CSV no duplica datos (upsert idempotente)', async () => {
@@ -178,5 +193,36 @@ describe('runImport', () => {
 
 		expect(report.ok).toBe(false);
 		expect(report.errors[0]).toContain('vacío');
+	});
+
+	it('un partido con forfeit_team da 0 pts al equipo sancionado', async () => {
+		const report = await runImport(db as unknown as D1Database, FORFEIT_CSV);
+
+		expect(report.ok).toBe(true);
+		expect(report.matches).toBe(1);
+
+		const cebras = db
+			.prepare(
+				`SELECT s.* FROM standings s JOIN teams t ON t.id = s.team_id WHERE t.name = 'Cebras'`,
+			)
+			.first<{ wins: number; losses: number; points: number }>();
+		expect(cebras?.wins).toBe(1);
+		expect(cebras?.losses).toBe(0);
+		expect(cebras?.points).toBe(2);
+
+		const vikingos = db
+			.prepare(
+				`SELECT s.* FROM standings s JOIN teams t ON t.id = s.team_id WHERE t.name = 'Vikingos'`,
+			)
+			.first<{ wins: number; losses: number; points: number }>();
+		expect(vikingos?.wins).toBe(0);
+		expect(vikingos?.losses).toBe(1);
+		expect(vikingos?.points).toBe(0);
+
+		const match = db
+			.prepare(`SELECT status, forfeit_team_id FROM matches LIMIT 1`)
+			.first<{ status: string; forfeit_team_id: number }>();
+		expect(match?.status).toBe('forfeit');
+		expect(match?.forfeit_team_id).not.toBeNull();
 	});
 });
