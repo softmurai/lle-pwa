@@ -2,7 +2,8 @@
 
 ## Sitio web (Worker)
 
-**Live:** https://lle-pwa.saulfdezcd.workers.dev
+**Live:** https://ligalocal.sfcnlab.com
+**Workers URL:** https://lle-pwa.saulfdezcd.workers.dev
 
 ### Despliegue manual
 
@@ -26,14 +27,13 @@ Los secrets de la worker (`IMPORT_SECRET`) **no** se sobreescriben con
 
 ### Dominio personalizado
 
-Las custom domains ahora se asignan desde el Dashboard:
+Asignado desde el Dashboard:
 
 1. Cloudflare Dashboard → Workers & Pages → **lle-pwa**.
-2. Settings → Triggers → Custom Domains → **Add custom domain**.
-3. Introduce `ligalocal.sfcnlab.com`.
-4. Confirma — se crea el registro DNS automáticamente.
+2. Settings → Triggers → Custom Domains → **Add custom domain** → `ligalocal.sfcnlab.com`.
+3. Se crea el registro DNS automáticamente en la zona `sfcnlab.com`.
 
-El dominio queda activo en pocos segundos (DNS propagado en la zona `sfcnlab.com`).
+Nota: `wrangler domains` fue eliminado en Wrangler 4.131; la vía canónica es el Dashboard.
 
 ## Cron de importación (Cron Worker)
 

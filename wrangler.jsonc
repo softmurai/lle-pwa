@@ -16,7 +16,7 @@
 		}
 	],
 	"vars": {
-		"IMPORT_CSV_URL": "https://lle-pwa.saulfdezcd.workers.dev/data/sample.csv"
+		"IMPORT_CSV_URL": "https://ligalocal.sfcnlab.com/data/sample.csv"
 	},
 	"observability": {
 		"enabled": true
