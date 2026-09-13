@@ -4,9 +4,14 @@ import Nav from '../components/Nav.astro';
 
 interface Props {
 	title: string;
+	description?: string;
 }
 
-const { title } = Astro.props;
+const {
+	title,
+	description = 'Clasificación, calendario y estadísticas de la Liga Local Elche.',
+} = Astro.props;
+const cardUrl = new URL('/icons/icon-512.png', Astro.url.origin);
 ---
 
 <html lang="es">
@@ -17,6 +22,15 @@ const { title } = Astro.props;
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="generator" content={Astro.generator} />
 		<meta name="theme-color" content="#111827" />
+		<link rel="manifest" href="/manifest.webmanifest" />
+		<link rel="apple-touch-icon" href="/icons/icon-192.png" />
+		<meta name="description" content={description} />
+		<meta property="og:type" content="website" />
+		<meta property="og:site_name" content="Liga Local Elche" />
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:image" content={cardUrl.toString()} />
+		<meta name="twitter:card" content="summary" />
 		<title>{title}</title>
 	</head>
 	<body class="flex min-h-screen flex-col bg-gray-100 text-gray-900 antialiased">
@@ -31,3 +45,11 @@ const { title } = Astro.props;
 		</footer>
 	</body>
 </html>
+
+<script>
+	if ('serviceWorker' in navigator && import.meta.env.PROD) {
+		window.addEventListener('load', () => {
+			navigator.serviceWorker.register('/sw.js').catch(() => {});
+		});
+	}
+</script>

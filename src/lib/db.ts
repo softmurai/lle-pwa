@@ -187,3 +187,69 @@ export async function getAllPlayers(): Promise<PlayerSearchRow[]> {
 		.all();
 	return res.results as unknown as PlayerSearchRow[];
 }
+
+export interface MatchDetail {
+	id: number;
+	week: number;
+	date: string;
+	home_score: number | null;
+	away_score: number | null;
+	status: string;
+	home_id: number;
+	home_team: string;
+	home_short: string;
+	away_id: number;
+	away_team: string;
+	away_short: string;
+}
+
+export async function getMatch(id: number): Promise<MatchDetail | null> {
+	const row = (await env.lle_pwa
+		.prepare(
+			`SELECT m.id, m.week, m.date, m.home_score, m.away_score, m.status,
+			        ht.id AS home_id, ht.name AS home_team, ht.short_name AS home_short,
+			        at.id AS away_id, at.name AS away_team, at.short_name AS away_short
+			 FROM matches m
+			 JOIN teams ht ON ht.id = m.home_team_id
+			 JOIN teams at ON at.id = m.away_team_id
+			 WHERE m.id = ?
+			 LIMIT 1`,
+		)
+		.bind(id)
+		.first()) as MatchDetail | null;
+	return row;
+}
+
+export interface BoxScoreRow {
+	team_id: number;
+	team_name: string;
+	team_short: string;
+	player_id: number;
+	player_name: string;
+	player_number: number | null;
+	points: number;
+	fg: number;
+	three: number;
+	ft_made: number;
+	ft_att: number;
+	fouls: number;
+}
+
+export async function getMatchBoxScore(matchId: number): Promise<BoxScoreRow[]> {
+	const res = await env.lle_pwa
+		.prepare(
+			`SELECT t.id AS team_id, t.name AS team_name, t.short_name AS team_short,
+			        p.id AS player_id, p.name AS player_name, p.number AS player_number,
+			        ms.points, ms.field_goals_made AS fg, ms.three_pt_made AS three,
+			        ms.free_throws_made AS ft_made, ms.free_throws_attempted AS ft_att,
+			        ms.fouls
+			 FROM match_stats ms
+			 JOIN players p ON p.id = ms.player_id
+			 JOIN teams t ON t.id = p.team_id
+			 WHERE ms.match_id = ?
+			 ORDER BY t.id, ms.points DESC, p.name COLLATE NOCASE`,
+		)
+		.bind(matchId)
+		.all();
+	return res.results as unknown as BoxScoreRow[];
+}

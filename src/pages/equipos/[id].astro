@@ -40,6 +40,11 @@ const statColumns = [
 			? `${team.name} · Liga Local Elche`
 			: 'Equipo · Liga Local Elche'
 	}
+	description={
+		team
+			? `Plantilla y estadísticas de ${team.name} en la Liga Local Elche.`
+			: undefined
+	}
 >
 	{
 		team ? (

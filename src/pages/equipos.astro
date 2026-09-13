@@ -19,7 +19,10 @@ const colorFor = (name: string) =>
 	colors[[...name].reduce((a, c) => a + c.charCodeAt(0), 0) % colors.length];
 ---
 
-<Layout title="Equipos · Liga Local Elche">
+<Layout
+	title="Equipos · Liga Local Elche"
+	description="Todos los equipos de la Liga Local Elche con su balance de victorias y derrotas."
+>
 	<div class="mx-auto max-w-5xl px-4 py-8">
 		<h1 class="text-2xl font-bold tracking-tight">Equipos</h1>
 
