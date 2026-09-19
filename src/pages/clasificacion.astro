@@ -9,6 +9,7 @@ const cols = [
 	{ label: 'PJ', align: 'text-right' },
 	{ label: 'V', align: 'text-right' },
 	{ label: 'D', align: 'text-right' },
+	{ label: 'NP', align: 'text-right' },
 	{ label: 'PF', align: 'text-right' },
 	{ label: 'PC', align: 'text-right' },
 	{ label: '+/-', align: 'text-right' },
@@ -69,10 +70,11 @@ const cols = [
 										data-col1={r.played}
 										data-col2={r.wins}
 										data-col3={r.losses}
-										data-col4={r.points_for}
-										data-col5={r.points_against}
-										data-col6={r.diff}
-										data-col7={r.points}
+										data-col4={r.forfeits}
+										data-col5={r.points_for}
+										data-col6={r.points_against}
+										data-col7={r.diff}
+										data-col8={r.points}
 									>
 										<td class="px-3 py-2.5 font-semibold text-gray-400">
 											<span data-pos>{r.position}</span>
@@ -91,6 +93,9 @@ const cols = [
 										</td>
 										<td class="px-3 py-2.5 text-right tabular-nums text-rose-600">
 											{r.losses}
+										</td>
+										<td class="px-3 py-2.5 text-right tabular-nums text-gray-700">
+											{r.forfeits}
 										</td>
 										<td class="px-3 py-2.5 text-right tabular-nums">{r.points_for}</td>
 										<td class="px-3 py-2.5 text-right tabular-nums">
@@ -119,9 +124,11 @@ const cols = [
 														const cls =
 															res === undefined
 																? 'bg-gray-200'
-																: res
+																: res === 'W'
 																	? 'bg-emerald-500'
-																	: 'bg-rose-500';
+																	: res === 'F'
+																		? 'bg-gray-900'
+																		: 'bg-rose-500';
 														return (
 															<span
 																class={[

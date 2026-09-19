@@ -8,11 +8,12 @@ export interface StandingRow {
 	played: number;
 	wins: number;
 	losses: number;
+	forfeits: number;
 	points_for: number;
 	points_against: number;
 	diff: number;
 	points: number;
-	form: boolean[];
+	form: ('W' | 'L' | 'F')[];
 }
 
 export interface FormMatchRow {
@@ -48,22 +49,44 @@ export async function getStandings(limit = 0): Promise<StandingRow[]> {
 		)
 		.all();
 
-	const byTeam = new Map<number, boolean[]>();
+	const byTeam = new Map<number, ('W' | 'L' | 'F')[]>();
+	const forfeitsByTeam = new Map<number, number>();
 	for (const m of mres.results as unknown as FormMatchRow[]) {
 		const forfeit = m.status === 'forfeit';
-		const homeWin = forfeit ? m.forfeit_team_id !== m.home_team_id : (m.home_score ?? 0) > (m.away_score ?? 0);
-		const awayWin = forfeit ? m.forfeit_team_id !== m.away_team_id : (m.away_score ?? 0) > (m.home_score ?? 0);
-		byTeam.set(m.home_team_id, [...(byTeam.get(m.home_team_id) ?? []), homeWin]);
-		byTeam.set(m.away_team_id, [...(byTeam.get(m.away_team_id) ?? []), awayWin]);
+		let homeResult: 'W' | 'L' | 'F' = 'L';
+		let awayResult: 'W' | 'L' | 'F' = 'L';
+		if (forfeit) {
+			if (m.forfeit_team_id === m.home_team_id) {
+				homeResult = 'F';
+				awayResult = 'W';
+			} else if (m.forfeit_team_id === m.away_team_id) {
+				homeResult = 'W';
+				awayResult = 'F';
+			}
+		} else {
+			if ((m.home_score ?? 0) > (m.away_score ?? 0)) homeResult = 'W';
+			if ((m.away_score ?? 0) > (m.home_score ?? 0)) awayResult = 'W';
+		}
+		byTeam.set(m.home_team_id, [...(byTeam.get(m.home_team_id) ?? []), homeResult]);
+		byTeam.set(m.away_team_id, [...(byTeam.get(m.away_team_id) ?? []), awayResult]);
+		if (forfeit) {
+			if (m.forfeit_team_id === m.home_team_id) {
+				forfeitsByTeam.set(m.home_team_id, (forfeitsByTeam.get(m.home_team_id) ?? 0) + 1);
+			}
+			if (m.forfeit_team_id === m.away_team_id) {
+				forfeitsByTeam.set(m.away_team_id, (forfeitsByTeam.get(m.away_team_id) ?? 0) + 1);
+			}
+		}
 	}
 
-	return (res.results as Omit<StandingRow, 'position' | 'form'>[]).map((r, i) => ({
+	return (res.results as Omit<StandingRow, 'position' | 'form' | 'forfeits'>[]).map((r, i) => ({
 		...r,
 		position: i + 1,
 		points_for: Number(r.points_for),
 		points_against: Number(r.points_against),
 		diff: Number(r.diff),
 		points: Number(r.points),
+		forfeits: forfeitsByTeam.get(r.id) ?? 0,
 		form: (byTeam.get(r.id) ?? []).slice(-5),
 	}));
 }

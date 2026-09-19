@@ -104,6 +104,7 @@ const standings = await getStandings(5);
 											<th class="px-3 py-3 font-medium text-right">PJ</th>
 											<th class="px-3 py-3 font-medium text-right">V</th>
 											<th class="px-3 py-3 font-medium text-right">D</th>
+											<th class="px-3 py-3 font-medium text-right">NP</th>
 											<th class="px-3 py-3 font-medium text-right">PF</th>
 											<th class="px-3 py-3 font-medium text-right">PC</th>
 											<th class="px-3 py-3 font-medium text-right">+/-</th>
@@ -125,59 +126,64 @@ const standings = await getStandings(5);
 														{r.name}
 													</a>
 												</td>
-												<td class="px-3 py-2.5 text-right tabular-nums">
-													{r.played}
-												</td>
-												<td class="px-3 py-2.5 text-right tabular-nums text-emerald-600">
-													{r.wins}
-												</td>
-												<td class="px-3 py-2.5 text-right tabular-nums text-rose-600">
-													{r.losses}
-												</td>
-												<td class="px-3 py-2.5 text-right tabular-nums">
-													{r.points_for}
-												</td>
-												<td class="px-3 py-2.5 text-right tabular-nums">
-													{r.points_against}
-												</td>
-												<td
-													class={[
-														'px-3 py-2.5 text-right font-medium tabular-nums',
-														r.diff > 0
-															? 'text-emerald-600'
-															: r.diff < 0
-																? 'text-rose-600'
-																: 'text-gray-500',
-													].join(' ')}
-												>
-													{r.diff > 0 ? `+${r.diff}` : r.diff}
-												</td>
-												<td class="px-3 py-2.5 text-right font-semibold tabular-nums">
-													{r.points}
-												</td>
-												<td class="px-3 py-2.5 text-right">
-													<span class="inline-flex justify-end gap-1">
-														{
-															Array.from({ length: 5 }, (_, i) => {
-																const res = r.form[i];
-																const cls =
-																	res === undefined
-																		? 'bg-gray-200'
-																		: res
-																			? 'bg-emerald-500'
+<td class="px-3 py-2.5 text-right tabular-nums">
+												{r.played}
+											</td>
+											<td class="px-3 py-2.5 text-right tabular-nums text-emerald-600">
+												{r.wins}
+											</td>
+											<td class="px-3 py-2.5 text-right tabular-nums text-rose-600">
+												{r.losses}
+											</td>
+											<td class="px-3 py-2.5 text-right tabular-nums text-gray-700">
+												{r.forfeits}
+											</td>
+											<td class="px-3 py-2.5 text-right tabular-nums">
+												{r.points_for}
+											</td>
+											<td class="px-3 py-2.5 text-right tabular-nums">
+												{r.points_against}
+											</td>
+											<td
+												class={[
+													'px-3 py-2.5 text-right font-medium tabular-nums',
+													r.diff > 0
+														? 'text-emerald-600'
+														: r.diff < 0
+															? 'text-rose-600'
+															: 'text-gray-500',
+												].join(' ')}
+											>
+												{r.diff > 0 ? `+${r.diff}` : r.diff}
+											</td>
+											<td class="px-3 py-2.5 text-right font-semibold tabular-nums">
+												{r.points}
+											</td>
+											<td class="px-3 py-2.5 text-right">
+												<span class="inline-flex justify-end gap-1">
+													{
+														Array.from({ length: 5 }, (_, i) => {
+															const res = r.form[i];
+															const cls =
+																res === undefined
+																	? 'bg-gray-200'
+																	: res === 'W'
+																		? 'bg-emerald-500'
+																		: res === 'F'
+																			? 'bg-gray-900'
 																			: 'bg-rose-500';
-																return (
-																	<span
-																		class={[
-																			'inline-block h-2 w-2 rounded-full',
-																			cls,
-																		].join(' ')}
-																	></span>
-																);
-															})
-														}
-													</span>
-												</td>
+															return (
+																<span
+																	class={[
+																		'inline-block h-2 w-2 rounded-full',
+																		cls,
+																	].join(' ')}
+																></span>
+															);
+														})
+													}
+												</span>
+											</td>
 											</tr>
 										))}
 									</tbody>
