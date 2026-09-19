@@ -21,6 +21,7 @@ progresses.
 ### 1. Estadísticas — rework of "Jugadores" `planned`
 
 - Rename the "Jugadores" section/page and bottom-nav tab to "Estadísticas".
+- Update icon to a more fitting one.
 - Leaderboards (new queries in `src/lib/db.ts`):
   - Puntos (score leaders)
   - Triples (3PM leaders)
