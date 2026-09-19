@@ -94,6 +94,7 @@ progresses.
 - R2 cloud storage for images (logos, headshots, match photos) — use repo assets for now.
 - Admin dashboard + login (Cloudflare Access if/when built) — no hand-rolled auth.
 - Extra stat tracking / schema refinements as the league requires.
+- Update README.md
 
 ## Open items / not yet decided
 
