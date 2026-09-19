@@ -8,6 +8,12 @@ pnpm run dev --background
 
 Manage the background server with `pnpm run astro dev stop`, `pnpm run astro dev status`, and `pnpm run astro dev logs`. Note: the `astro` binary is not on the global PATH — always run it via pnpm.
 
+## Next steps / to-dos
+
+When the user asks for "what's next", what to work on, or for a to-do list, consult
+[`docs/roadmap.md`](docs/roadmap.md) **first**. Keep its statuses in sync as work
+progresses and record new decisions there during sessions.
+
 ## Previewing layout changes
 
 When a prompt contains "preview layout" (or is otherwise a layout preview request):

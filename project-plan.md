@@ -77,10 +77,8 @@ the foreseeable future.
 2. **Import pipeline** — Sheet published CSV → Worker → D1 (end-to-end data path)
 3. **PWA** install support
 
-Deferred / nice-to-haves (keep as roadmap, don't build yet):
-- R2 cloud storage for images (use repo assets for now)
-- Admin dashboard + login (use Cloudflare Access if/when built)
-- Extra stat tracking / schema refinements as the league requires
+Deferred / nice-to-haves and open decisions moved to [`docs/roadmap.md`](docs/roadmap.md) —
+consult it for backlog, deferred work, and open items.
 
 ## Deployment steps
 1. Push Astro repo to GitHub
@@ -91,7 +89,3 @@ Deferred / nice-to-haves (keep as roadmap, don't build yet):
 5. **Cron trigger** Worker weekly CSV → `/api/import` → D1, plus the manual
    "Publish Update" fallback
 6. (Later) Add R2, admin via Cloudflare Access
-
-## Open items / not yet decided
-- Whether to build an admin dashboard after the MVP (Cloudflare Access or custom auth)
-- Final D1 schema details (indexes, exact stat columns tracked per player/match)
