@@ -1,5 +1,5 @@
-// Reloj: sábados 20:00 hora de Madrid (UTC+2 en verano -> cron 0 18 * * 6).
-// De octubre a marzo (CET, UTC+1) dispara a las 19:00 UTC; ajustar el cron entonces.
+// Reloj: sábados 23:59 hora de Madrid (UTC+2 en verano -> cron 59 21 * * 6).
+// En octubre (CET, UTC+1) dispara una hora más tarde; ajustar a 59 22 * * 6 entonces.
 export default {
 	async scheduled(_event, env) {
 		const res = await fetch(`${env.APP_URL}/api/import`, {

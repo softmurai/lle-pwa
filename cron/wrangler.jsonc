@@ -4,7 +4,7 @@
 	"main": "index.js",
 	"compatibility_date": "2026-09-11",
 	"triggers": {
-		"crons": ["0 18 * * 6"]
+		"crons": ["59 21 * * 6"]
 	},
 	"vars": {
 		"APP_URL": "https://ligalocal.sfcnlab.com"

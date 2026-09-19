@@ -69,8 +69,8 @@ pestañas no salgan en la exportación (publica solo la pestaña de datos).
 
 ## Detalles técnicos
 
-- La importación se ejecuta automáticamente cada sábado a las 20:00 de Madrid
-  (cron `0 18 * * 6`; en invierno UTC pasa a `0 19 * * 6` — DST).
+- La importación se ejecuta automáticamente cada sábado a las 23:59 de Madrid
+  (cron `59 21 * * 6`; en invierno UTC pasa a `59 22 * * 6` — DST).
 - También puedes lanzar la importación manualmente con un POST a `/api/import`
   con la cabecera `x-import-secret`.
 - La importación es idempotente: repetir el mismo CSV no crea duplicados
