@@ -154,8 +154,8 @@ export async function runImport(db: D1Database, csvText: string): Promise<Import
       report.errors.push(`Fila ${r + 1}: falta week/date/equipos.`);
       continue;
     }
-    const homeScore = parseInt(get('home_score'), 10);
-    const awayScore = parseInt(get('away_score'), 10);
+    let homeScore = parseInt(get('home_score'), 10);
+    let awayScore = parseInt(get('away_score'), 10);
     if (Number.isNaN(homeScore) || Number.isNaN(awayScore)) {
       report.skipped += 1;
       report.errors.push(`Fila ${r + 1} (${homeTeam} vs ${awayTeam}): marcadores no numéricos.`);
@@ -185,6 +185,9 @@ export async function runImport(db: D1Database, csvText: string): Promise<Import
       }
       matchStatus = 'forfeit';
       forfeitTeamId = forfeitTeam === homeTeam ? homeId : awayId;
+      // Regla: un partido no presentado se da por ganado 20-0 al equipo que sí se presenta.
+      homeScore = forfeitTeamId === awayId ? 20 : 0;
+      awayScore = forfeitTeamId === homeId ? 20 : 0;
     }
 
     const teamIdRow = team === homeTeam ? homeId : awayId;

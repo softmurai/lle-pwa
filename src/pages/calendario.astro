@@ -1,8 +1,9 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import ResultBadge from '../components/ResultBadge.astro';
 import type { MatchRow } from '../lib/db';
 import { getAllMatches } from '../lib/db';
-import { formatDate, formatTime } from '../lib/format';
+import { formatDate, formatTime, teamOutcome } from '../lib/format';
 
 const matches = await getAllMatches();
 const byWeek = new Map<number, { date: string; matches: MatchRow[] }>();
@@ -52,21 +53,28 @@ const weeks = [...byWeek.entries()];
 													{formatTime(m.time) || formatDate(m.date)}
 												</div>
 												<div class="flex items-center justify-between gap-3">
-													<span class="flex-1 truncate font-medium">
-														{m.home_team}
-													</span>
-													<span class="rounded-lg bg-gray-100 px-3 py-1 text-sm font-bold tabular-nums">
+													<div class="flex min-w-0 flex-1 items-center gap-1.5">
+														<span class="truncate font-medium">
+															{m.home_team}
+														</span>
+														{(() => {
+															const outcome = teamOutcome(m, 'home');
+															return outcome && <ResultBadge variant={outcome} />;
+														})()}
+													</div>
+													<span class="shrink-0 rounded-lg bg-gray-100 px-3 py-1 text-sm font-bold tabular-nums">
 														{m.home_score ?? '–'} – {m.away_score ?? '–'}
 													</span>
-													<span class="flex-1 truncate text-right font-medium">
-														{m.away_team}
-													</span>
+													<div class="flex min-w-0 flex-1 items-center justify-end gap-1.5">
+														{(() => {
+															const outcome = teamOutcome(m, 'away');
+															return outcome && <ResultBadge variant={outcome} />;
+														})()}
+														<span class="truncate text-right font-medium">
+															{m.away_team}
+														</span>
+													</div>
 												</div>
-												{m.status !== 'finished' && (
-													<span class="mt-2 inline-block rounded bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
-														{m.status.toUpperCase()}
-													</span>
-												)}
 											</a>
 										))
 									}

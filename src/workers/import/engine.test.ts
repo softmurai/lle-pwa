@@ -195,7 +195,7 @@ describe('runImport', () => {
 		expect(report.errors[0]).toContain('vacío');
 	});
 
-	it('un partido con forfeit_team da 0 pts al equipo sancionado', async () => {
+	it('un partido con forfeit_team da 0 pts al equipo sancionado y resultado 20-0', async () => {
 		const report = await runImport(db as unknown as D1Database, FORFEIT_CSV);
 
 		expect(report.ok).toBe(true);
@@ -205,24 +205,30 @@ describe('runImport', () => {
 			.prepare(
 				`SELECT s.* FROM standings s JOIN teams t ON t.id = s.team_id WHERE t.name = 'Cebras'`,
 			)
-			.first<{ wins: number; losses: number; points: number }>();
+			.first<{ wins: number; losses: number; points: number; points_for: number; points_against: number }>();
 		expect(cebras?.wins).toBe(1);
 		expect(cebras?.losses).toBe(0);
 		expect(cebras?.points).toBe(2);
+		expect(cebras?.points_for).toBe(20);
+		expect(cebras?.points_against).toBe(0);
 
 		const vikingos = db
 			.prepare(
 				`SELECT s.* FROM standings s JOIN teams t ON t.id = s.team_id WHERE t.name = 'Vikingos'`,
 			)
-			.first<{ wins: number; losses: number; points: number }>();
+			.first<{ wins: number; losses: number; points: number; points_for: number; points_against: number }>();
 		expect(vikingos?.wins).toBe(0);
 		expect(vikingos?.losses).toBe(1);
 		expect(vikingos?.points).toBe(0);
+		expect(vikingos?.points_for).toBe(0);
+		expect(vikingos?.points_against).toBe(20);
 
 		const match = db
-			.prepare(`SELECT status, forfeit_team_id FROM matches LIMIT 1`)
-			.first<{ status: string; forfeit_team_id: number }>();
+			.prepare(`SELECT status, forfeit_team_id, home_score, away_score FROM matches LIMIT 1`)
+			.first<{ status: string; forfeit_team_id: number; home_score: number; away_score: number }>();
 		expect(match?.status).toBe('forfeit');
 		expect(match?.forfeit_team_id).not.toBeNull();
+		expect(match?.home_score).toBe(20);
+		expect(match?.away_score).toBe(0);
 	});
 });

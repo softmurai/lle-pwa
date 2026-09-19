@@ -99,6 +99,9 @@ export interface MatchRow {
 	home_score: number | null;
 	away_score: number | null;
 	status: string;
+	home_id: number;
+	away_id: number;
+	forfeit_team_id: number | null;
 	home_team: string;
 	home_short: string;
 	away_team: string;
@@ -109,6 +112,7 @@ async function matchesQuery(where = '', orderBy = '', bind: unknown[] = []): Pro
 	const res = await env.lle_pwa
 		.prepare(
 			`SELECT m.id, m.week, m.date, m.time, m.home_score, m.away_score, m.status,
+			        m.home_team_id AS home_id, m.away_team_id AS away_id, m.forfeit_team_id,
 			        ht.name AS home_team, ht.short_name AS home_short,
 			        at.name AS away_team, at.short_name AS away_short
 			 FROM matches m
@@ -259,6 +263,7 @@ export interface MatchDetail {
 	away_id: number;
 	away_team: string;
 	away_short: string;
+	forfeit_team_id: number | null;
 }
 
 export async function getMatch(id: number): Promise<MatchDetail | null> {
@@ -266,7 +271,8 @@ export async function getMatch(id: number): Promise<MatchDetail | null> {
 		.prepare(
 			`SELECT m.id, m.week, m.date, m.time, m.home_score, m.away_score, m.status,
 			        ht.id AS home_id, ht.name AS home_team, ht.short_name AS home_short,
-			        at.id AS away_id, at.name AS away_team, at.short_name AS away_short
+			        at.id AS away_id, at.name AS away_team, at.short_name AS away_short,
+			        m.forfeit_team_id
 			 FROM matches m
 			 JOIN teams ht ON ht.id = m.home_team_id
 			 JOIN teams at ON at.id = m.away_team_id
