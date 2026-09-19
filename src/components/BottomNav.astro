@@ -1,0 +1,73 @@
+---
+const pathname = Astro.url.pathname;
+const links = [
+	{
+		href: '/calendario',
+		label: 'Calendario',
+		icon: 'M8 2v4M16 2v4M3 8h18M4 4h16a1 1 0 011 1v16a1 1 0 01-1 1H4a1 1 0 01-1-1V5a1 1 0 011-1z',
+	},
+	{
+		href: '/clasificacion',
+		label: 'Clasificación',
+		icon: 'M8 21h8M12 17v4M7 4h10v4a5 5 0 01-10 0V4zM7 7H3a1 1 0 000 2h3M17 7h4a1 1 0 010 2h-4',
+	},
+	{
+		href: '/',
+		label: 'Inicio',
+		icon: 'M3 12l9-9 9 9M5 10v10a1 1 0 001 1h4V14h4v7h4a1 1 0 001-1V10',
+	},
+	{
+		href: '/equipos',
+		label: 'Equipos',
+		icon: 'M12 2l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5l8-3z',
+	},
+	{
+		href: '/jugadores',
+		label: 'Jugadores',
+		icon: 'M15 4l6 2v5h-3v8a1 1 0 0 1 -1 1h-10a1 1 0 0 1 -1 -1v-8h-3v-5l6 -2a3 3 0 0 0 6 0 M10.5 11h2.5l-1.5 5',
+	},
+];
+const isActive = (href: string) =>
+	href === '/' ? pathname === '/' : pathname.startsWith(href);
+---
+
+<nav
+	aria-label="Navegación principal (móvil)"
+	class="fixed inset-x-0 bottom-0 z-20 border-t border-gray-200 bg-white md:hidden"
+>
+	<ul
+		class="mx-auto flex max-w-5xl items-stretch pb-[env(safe-area-inset-bottom)]"
+	>
+		{
+			links.map((l) => (
+				<li class="flex-1">
+					<a
+						href={l.href}
+						aria-current={isActive(l.href) ? 'page' : undefined}
+						class={
+							'flex flex-col items-center gap-0.5 py-2 text-[11px] font-medium transition-colors ' +
+							(isActive(l.href)
+								? 'text-orange-600'
+								: 'text-gray-500 hover:text-gray-700')
+						}
+					>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							width="22"
+							height="22"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+						>
+							<path d={l.icon}></path>
+						</svg>
+						<span>{l.label}</span>
+					</a>
+				</li>
+			))
+		}
+	</ul>
+</nav>

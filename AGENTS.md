@@ -3,10 +3,23 @@
 When starting the dev server, use background mode:
 
 ```
-astro dev --background
+pnpm run dev --background
 ```
 
-Manage the background server with `astro dev stop`, `astro dev status`, and `astro dev logs`.
+Manage the background server with `pnpm run astro dev stop`, `pnpm run astro dev status`, and `pnpm run astro dev logs`. Note: the `astro` binary is not on the global PATH — always run it via pnpm.
+
+## Previewing layout changes
+
+When a prompt contains "preview layout" (or is otherwise a layout preview request):
+
+- Make the requested code changes but **do NOT commit and do NOT deploy** — the user wants to check it on mobile first.
+- After the changes, start the dev server exposed on the LAN so it can be opened on a mobile device:
+
+  ```
+  pnpm run dev --host --background
+  ```
+
+- Get the LAN URL (printed after start, or via `pnpm run astro dev status`) and tell the user to open it on their phone. Offer any cleanup steps (e.g. `pnpm run astro dev stop`) when done.
 
 ## Documentation
 

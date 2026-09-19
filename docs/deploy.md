@@ -5,11 +5,18 @@
 **Live:** https://ligalocal.sfcnlab.com
 **Workers URL:** https://lle-pwa.saulfdezcd.workers.dev
 
+> **Nota:** `ligalocal.sfcnlab.com` puede estar bloqueado por tu ISP (orden judicial de
+> Telefónica durante partidos de La Liga). Para verificar usa
+> https://lle-pwa.saulfdezcd.workers.dev — el cron → `/api/import` es tráfico interno de
+> Cloudflare y no se ve afectado.
+
 ### Despliegue manual
 
 ```bash
-npm run deploy
+pnpm run deploy
 ```
+
+El repo usa pnpm (ver `packageManager` en `package.json`). CI también usa pnpm.
 
 ### Despliegue automático (CI)
 
@@ -40,7 +47,7 @@ Nota: `wrangler domains` fue eliminado en Wrangler 4.131; la vía canónica es e
 Separado del Worker principal. Se despliega con:
 
 ```bash
-npm run deploy:cron
+pnpm run deploy:cron
 ```
 
 Requiere `IMPORT_SECRET` (el mismo que la app) via `wrangler secret put`.
@@ -58,3 +65,16 @@ npx wrangler d1 migrations apply lle_pwa --remote
 ```
 
 En CI se ejecutan automáticamente en cada push a `main`.
+
+### Re-importar sin el secret
+
+`IMPORT_SECRET` es de solo-escritura (Cloudflare nunca devuelve el valor por API), así que
+no se puede re-disparar `/api/import` manualmente. Para (re)poblar la BD: ejecuta el motor
+de importación localmente contra better-sqlite3 (igual que `src/workers/import/engine.test.ts`),
+vuelca las tablas a SQL y aplícalo en remoto:
+
+```bash
+npx wrangler d1 execute lle-pwa --remote --command="$(cat dump.sql)"
+```
+
+Nota: `--file=` y stdin (`--command=-`) fallan — usa `--command` inline.

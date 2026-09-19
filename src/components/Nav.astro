@@ -37,55 +37,5 @@ const isActive = (href: string) =>
 				))
 			}
 		</nav>
-
-		<details class="relative md:hidden" data-mobile-menu>
-			<summary
-				class="flex cursor-pointer list-none items-center rounded-lg p-2 transition-colors hover:bg-white/10 [&::-webkit-details-marker]:hidden"
-			>
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					width="22"
-					height="22"
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="2"
-					stroke-linecap="round"
-				>
-					<path d="M4 6h16M4 12h16M4 18h16"></path>
-				</svg>
-			</summary>
-			<div
-				class="absolute right-0 top-12 flex w-44 flex-col rounded-xl border border-gray-700 bg-gray-900 p-1.5 shadow-xl"
-			>
-				{
-					links.map((l) => (
-						<a
-							href={l.href}
-							class={
-								isActive(l.href)
-									? 'rounded-lg bg-white/10 px-3 py-2 text-sm font-medium text-white'
-									: 'rounded-lg px-3 py-2 text-sm text-gray-300 transition-colors hover:bg-white/10 hover:text-white'
-							}
-						>
-							{l.label}
-						</a>
-					))
-				}
-			</div>
-		</details>
 	</div>
 </header>
-
-<script>
-	const menu = document.querySelector<HTMLDetailsElement>(
-		'[data-mobile-menu]',
-	);
-	menu
-		?.querySelectorAll('a')
-		.forEach((a) =>
-			a.addEventListener('click', () => {
-				if (menu) menu.open = false;
-			}),
-		);
-</script>
