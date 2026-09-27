@@ -8,6 +8,26 @@ export function formatDate(date: string): string {
 	});
 }
 
+export const headerTips: Record<string, string> = {
+	PJ: 'Partidos jugados',
+	V: 'Victorias',
+	D: 'Derrotas',
+	NP: 'No presentado',
+	PF: 'Puntos a favor',
+	PC: 'Puntos en contra',
+	'+/-': 'Diferencia de puntos',
+	PTS: 'Puntos',
+	P: 'Puntos',
+	'Pts/PJ': 'Puntos por partido',
+	'2P': 'Tiros de 2 anotados',
+	'3P': 'Triples anotados',
+	TL: 'Tiros libres anotados',
+	TLA: 'Tiros libres intentados',
+	'TL%': 'Porcentaje de tiros libres',
+	Fal: 'Faltas',
+	RACHA: 'Últimos 5 partidos',
+};
+
 export function formatTime(time: string | null | undefined): string {
 	if (!time) return '';
 	const [h, m] = time.split(':');

@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import ThTooltip from '../components/ThTooltip.astro';
 import { getAllPlayers } from '../lib/db';
 
 const players = await getAllPlayers();
@@ -44,7 +45,7 @@ const players = await getAllPlayers();
 								<th data-sort class="px-3 py-3 font-medium">Nombre</th>
 								<th data-sort class="px-3 py-3 font-medium">Equipo</th>
 								<th data-sort class="px-3 py-3 font-medium text-right">Dorsal</th>
-								<th data-sort class="px-3 py-3 font-medium text-right">PJ</th>
+								<th data-sort class="px-3 py-3 font-medium text-right"><ThTooltip label="PJ" /></th>
 								<th data-sort class="px-3 py-3 font-medium text-right">Puntos</th>
 							</tr>
 						</thead>

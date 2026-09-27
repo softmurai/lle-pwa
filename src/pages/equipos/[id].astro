@@ -1,5 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import ThTooltip from '../../components/ThTooltip.astro';
 import { getTeam, getRoster } from '../../lib/db';
 
 const id = Number(Astro.params.id);
@@ -111,7 +112,7 @@ const statColumns = [
 													i === 0 ? 'text-left' : 'text-right',
 												].join(' ')}
 											>
-												{c.label}
+												<ThTooltip label={c.label} />
 											</th>
 										))
 									}

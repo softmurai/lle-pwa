@@ -1,6 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import ResultBadge from '../components/ResultBadge.astro';
+import ThTooltip from '../components/ThTooltip.astro';
 import { getStandings, getLatestWeek, getWeekMatches } from '../lib/db';
 import { formatDate, formatTime, teamOutcome } from '../lib/format';
 
@@ -109,15 +110,15 @@ const standings = await getStandings(5);
 										>
 											<th class="w-12 px-3 py-3 font-medium">#</th>
 											<th class="px-3 py-3 font-medium">Equipo</th>
-											<th class="px-3 py-3 font-medium text-right">PJ</th>
-											<th class="px-3 py-3 font-medium text-right">V</th>
-											<th class="px-3 py-3 font-medium text-right">D</th>
-											<th class="px-3 py-3 font-medium text-right">NP</th>
-											<th class="px-3 py-3 font-medium text-right">PF</th>
-											<th class="px-3 py-3 font-medium text-right">PC</th>
-											<th class="px-3 py-3 font-medium text-right">+/-</th>
-											<th class="px-3 py-3 font-medium text-right">PTS</th>
-											<th class="px-3 py-3 font-medium text-right">RACHA</th>
+											<th class="px-3 py-3 font-medium text-right"><ThTooltip label="PJ" /></th>
+											<th class="px-3 py-3 font-medium text-right"><ThTooltip label="V" /></th>
+											<th class="px-3 py-3 font-medium text-right"><ThTooltip label="D" /></th>
+											<th class="px-3 py-3 font-medium text-right"><ThTooltip label="NP" /></th>
+											<th class="px-3 py-3 font-medium text-right"><ThTooltip label="PF" /></th>
+											<th class="px-3 py-3 font-medium text-right"><ThTooltip label="PC" /></th>
+											<th class="px-3 py-3 font-medium text-right"><ThTooltip label="+/-" /></th>
+											<th class="px-3 py-3 font-medium text-right"><ThTooltip label="PTS" /></th>
+											<th class="px-3 py-3 font-medium text-right"><ThTooltip label="RACHA" /></th>
 										</tr>
 									</thead>
 									<tbody>

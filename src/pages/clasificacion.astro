@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import ThTooltip from '../components/ThTooltip.astro';
 import { getStandings } from '../lib/db';
 
 const standings = await getStandings();
@@ -52,12 +53,12 @@ const cols = [
 												i === 0 ? 'text-left' : 'text-right',
 											].join(' ')}
 										>
-											{c.label}
+											<ThTooltip label={c.label} />
 										</th>
 									))
 								}
 								<th class="whitespace-nowrap px-3 py-3 text-right font-medium">
-									RACHA
+									<ThTooltip label="RACHA" />
 								</th>
 							</tr>
 						</thead>

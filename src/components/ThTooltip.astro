@@ -1,0 +1,32 @@
+---
+import { headerTips } from '../lib/format';
+
+interface Props {
+	label: string;
+}
+
+const { label } = Astro.props;
+const tip = headerTips[label];
+---
+
+{
+	tip ? (
+		<span
+			tabindex="0"
+			aria-label={tip}
+			class="group relative inline-flex cursor-help items-center rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-300"
+		>
+			{label}
+			<span
+				class="pointer-events-none absolute left-1/2 top-full z-10 mt-1.5 -translate-x-1/2 whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-[11px] font-medium leading-tight text-white opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus:opacity-100 group-active:opacity-100"
+			>
+				{tip}
+				<span
+					class="absolute left-1/2 bottom-full -mb-1 h-0 w-0 -translate-x-1/2 border-4 border-transparent border-b-gray-900"
+				></span>
+			</span>
+		</span>
+	) : (
+		<span>{label}</span>
+	)
+}

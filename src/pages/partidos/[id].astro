@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import ResultBadge from '../../components/ResultBadge.astro';
+import ThTooltip from '../../components/ThTooltip.astro';
 import type { BoxScoreRow } from '../../lib/db';
 import { getMatch, getMatchBoxScore } from '../../lib/db';
 import { formatDate, formatTime, teamOutcome } from '../../lib/format';
@@ -126,7 +127,7 @@ const boxColumns = [
 																			: 'text-right',
 																	].join(' ')}
 																>
-																	{c.label}
+																	<ThTooltip label={c.label} />
 																</th>
 															))
 														}

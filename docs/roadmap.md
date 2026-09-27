@@ -87,6 +87,23 @@ progresses.
 - Needs an image per match — storage decision open: repo assets for now vs. R2
   (ties into the R2 nice-to-have below).
 
+### 9. Hover tooltips on acronym table headers `done`
+
+- Same tooltip pattern as `ResultBadge` (wrapper `group relative` + absolute tooltip,
+  `group-hover`/`group-focus`/`group-active`, `pointer-events-none`, `tabindex="0"` +
+  `aria-label`). Reusable `ThTooltip.astro` component; no tooltip on plain-text headers.
+- Acronym → meaning:
+  - **PJ** «Partidos jugados», **V** «Victorias», **D** «Derrotas», **NP**
+    «No presentado», **PF** «Puntos a favor», **PC** «Puntos en contra», **+/-**
+    «Diferencia de puntos», **PTS** «Puntos», **P** «Puntos», **Pts/PJ**
+    «Puntos por partido»
+  - **2P** «Tiros de 2 anotados», **3P** «Triples anotados», **TL**
+    «Tiros libres anotados», **TLA** «Tiros libres intentados», **TL%**
+    «Porcentaje de tiros libres», **Fal** «Faltas», **RACHA** «Últimos 5 partidos»
+- Applies to: Clasificación + Inicio standings (PJ/V/D/NP/PF/PC/±/PTS/RACHA), Jugadores
+  (PJ), Equipos/`[id]` roster (PJ/Pts·PJ/2P/3P/TL%), Partido/`[id]` box score
+  (P/2P/3P/TL/TLA/Fal).
+
 ---
 
 ## Deferred / nice-to-haves (roadmap)
