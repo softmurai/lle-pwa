@@ -1,5 +1,17 @@
 @import "tailwindcss";
 
+@font-face {
+	font-family: "Bebas Neue";
+	src: url("/fonts/BebasNeue-Regular.woff2") format("woff2");
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}
+
+@theme {
+	--font-display: "Bebas Neue", "Arial Narrow", sans-serif;
+}
+
 @keyframes row-in {
 	from { opacity: 0; transform: translateY(-4px); }
 	to   { opacity: 1; transform: none; }

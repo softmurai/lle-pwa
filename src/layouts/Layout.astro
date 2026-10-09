@@ -10,7 +10,7 @@ interface Props {
 
 const {
 	title,
-	description = 'Clasificación, calendario y estadísticas de la Liga Local Elche.',
+	description = 'Clasificación, calendario y estadísticas de la Liga Elche Baloncesto.',
 } = Astro.props;
 const cardUrl = new URL('/icon-512.png', Astro.url.origin);
 ---
@@ -26,7 +26,7 @@ const cardUrl = new URL('/icon-512.png', Astro.url.origin);
 		<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
 		<meta name="description" content={description} />
 		<meta property="og:type" content="website" />
-		<meta property="og:site_name" content="Liga Local Elche" />
+		<meta property="og:site_name" content="Liga Elche Baloncesto" />
 		<meta property="og:title" content={title} />
 		<meta property="og:description" content={description} />
 		<meta property="og:image" content={cardUrl.toString()} />
@@ -41,7 +41,7 @@ const cardUrl = new URL('/icon-512.png', Astro.url.origin);
 		<footer
 			class="border-t border-gray-200 bg-white py-5 text-center text-xs text-gray-400"
 		>
-			Liga Local Elche · Datos importados semanalmente
+			Liga Elche Baloncesto · Datos importados semanalmente
 		</footer>
 		<BottomNav />
 	</body>

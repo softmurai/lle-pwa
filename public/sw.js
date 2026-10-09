@@ -1,4 +1,4 @@
-const VERSION = 'lle-v3';
+const VERSION = 'lle-v4';
 const ASSET_CACHE = `assets-${VERSION}`;
 const PAGE_CACHE = `pages-${VERSION}`;
 const CORE_ASSETS = [
@@ -7,6 +7,7 @@ const CORE_ASSETS = [
 	'/manifest.webmanifest',
 	'/favicon.svg',
 	'/icon-512.png',
+	'/fonts/BebasNeue-Regular.woff2',
 ];
 
 self.addEventListener('install', (event) => {

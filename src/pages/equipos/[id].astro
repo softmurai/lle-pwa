@@ -38,12 +38,12 @@ const statColumns = [
 <Layout
 	title={
 		team
-			? `${team.name} · Liga Local Elche`
-			: 'Equipo · Liga Local Elche'
+			? `${team.name} · Liga Elche Baloncesto`
+			: 'Equipo · Liga Elche Baloncesto'
 	}
 	description={
 		team
-			? `Plantilla y estadísticas de ${team.name} en la Liga Local Elche.`
+			? `Plantilla y estadísticas de ${team.name} en la Liga Elche Baloncesto.`
 			: undefined
 	}
 >
@@ -60,7 +60,7 @@ const statColumns = [
 						{team.short_name.toUpperCase()}
 					</span>
 					<div>
-						<h1 class="text-2xl font-bold tracking-tight">{team.name}</h1>
+						<h1 class="font-display text-2xl tracking-wide">{team.name}</h1>
 						<p class="text-sm text-gray-500">
 							{team.wins} victorias · {team.losses} derrotas · {team.played}{' '}
 							{team.played === 1 ? 'partido' : 'partidos'}

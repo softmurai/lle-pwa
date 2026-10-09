@@ -37,12 +37,12 @@ const boxColumns = [
 <Layout
 	title={
 		match
-			? `${match.home_team} vs ${match.away_team} · Liga Local Elche`
-			: 'Partido · Liga Local Elche'
+			? `${match.home_team} vs ${match.away_team} · Liga Elche Baloncesto`
+			: 'Partido · Liga Elche Baloncesto'
 	}
 	description={
 		match
-			? `Resultado y estadísticas de ${match.home_team} contra ${match.away_team}, jornada ${match.week} de la Liga Local Elche.`
+			? `Resultado y estadísticas de ${match.home_team} contra ${match.away_team}, jornada ${match.week} de la Liga Elche Baloncesto.`
 			: undefined
 	}
 >
@@ -76,7 +76,7 @@ const boxColumns = [
 							return outcome && <ResultBadge variant={outcome} />;
 						})()}
 					</div>
-					<span class="shrink-0 rounded-xl bg-gray-900 px-5 py-2 text-xl font-bold text-white tabular-nums">
+					<span class="shrink-0 rounded-xl bg-gray-900 px-5 py-2 font-display text-3xl tracking-wider text-white tabular-nums">
 						{match.home_score ?? '–'} – {match.away_score ?? '–'}
 					</span>
 					<div class="flex min-w-0 flex-1 items-center justify-end gap-2">

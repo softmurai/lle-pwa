@@ -1,7 +1,7 @@
 {
-	"name": "Liga Local Elche",
+	"name": "Liga Elche Baloncesto",
 	"short_name": "Liga Local",
-	"description": "Clasificación, calendario y estadísticas de la Liga Local Elche.",
+	"description": "Clasificación, calendario y estadísticas de la Liga Elche Baloncesto.",
 	"lang": "es",
 	"start_url": "/",
 	"scope": "/",
