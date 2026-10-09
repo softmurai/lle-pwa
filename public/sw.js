@@ -1,12 +1,12 @@
-const VERSION = 'lle-v2';
+const VERSION = 'lle-v3';
 const ASSET_CACHE = `assets-${VERSION}`;
 const PAGE_CACHE = `pages-${VERSION}`;
 const CORE_ASSETS = [
 	'/',
 	'/offline',
 	'/manifest.webmanifest',
-	'/android-chrome-192x192.png',
-	'/android-chrome-512x512.png',
+	'/favicon.svg',
+	'/icon-512.png',
 ];
 
 self.addEventListener('install', (event) => {
