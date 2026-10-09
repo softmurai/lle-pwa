@@ -7,8 +7,7 @@
 
 > **Nota:** `ligalocal.sfcnlab.com` puede estar bloqueado por tu ISP (orden judicial de
 > Telefónica durante partidos de La Liga). Para verificar usa
-> https://lle-pwa.saulfdezcd.workers.dev — el cron → `/api/import` es tráfico interno de
-> Cloudflare y no se ve afectado.
+> https://lle-pwa.saulfdezcd.workers.dev.
 
 ### Despliegue manual
 
@@ -20,7 +19,7 @@ El repo usa pnpm (ver `packageManager` en `package.json`). CI también usa pnpm.
 
 ### Despliegue automático (CI)
 
-Un push a `main` despliega web + cron de forma automática via GitHub Actions.
+Un push a `main` despliega la web de forma automática via GitHub Actions.
 
 Requiere los secrets en GitHub:
 
@@ -28,9 +27,6 @@ Requiere los secrets en GitHub:
 |---|---|
 | `CLOUDFLARE_API_TOKEN` | Token de API de Cloudflare (permisos: Workers, D1, DNS) |
 | `CLOUDFLARE_ACCOUNT_ID` | ID de la cuenta Cloudflare |
-
-Los secrets de la worker (`IMPORT_SECRET`) **no** se sobreescriben con
-`wrangler deploy` — se mantienen en la cuenta.
 
 ### Dominio personalizado
 
@@ -41,16 +37,6 @@ Asignado desde el Dashboard:
 3. Se crea el registro DNS automáticamente en la zona `sfcnlab.com`.
 
 Nota: `wrangler domains` fue eliminado en Wrangler 4.131; la vía canónica es el Dashboard.
-
-## Cron de importación (Cron Worker)
-
-Separado del Worker principal. Se despliega con:
-
-```bash
-pnpm run deploy:cron
-```
-
-Requiere `IMPORT_SECRET` (el mismo que la app) via `wrangler secret put`.
 
 ## Base de datos D1
 
@@ -66,15 +52,12 @@ npx wrangler d1 migrations apply lle_pwa --remote
 
 En CI se ejecutan automáticamente en cada push a `main`.
 
-### Re-importar sin el secret
+### Actualizar datos
 
-`IMPORT_SECRET` es de solo-escritura (Cloudflare nunca devuelve el valor por API), así que
-no se puede re-disparar `/api/import` manualmente. Para (re)poblar la BD: ejecuta el motor
-de importación localmente contra better-sqlite3 (igual que `src/workers/import/engine.test.ts`),
-vuelca las tablas a SQL y aplícalo en remoto:
+El alta de equipos y jugadores (master data) se hace manualmente en D1. Para los
+resultados, el flujo Excel→SQL (roadmap #14/#15) genera el SQL y se aplica desde la
+consola de D1 de Cloudflare. Alternativa por CLI:
 
 ```bash
-npx wrangler d1 execute lle-pwa --remote --command="$(cat dump.sql)"
+npx wrangler d1 execute lle-pwa --remote --file=seed.sql
 ```
-
-Nota: `--file=` y stdin (`--command=-`) fallan — usa `--command` inline.

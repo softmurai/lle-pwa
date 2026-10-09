@@ -15,9 +15,6 @@
 			"database_id": "dc3dc314-c508-4a76-b919-6f92f86f891d"
 		}
 	],
-	"vars": {
-		"IMPORT_CSV_URL": "https://ligalocal.sfcnlab.com/data/sample.csv"
-	},
 	"observability": {
 		"enabled": true
 	}
