@@ -12,19 +12,20 @@ const {
 	title,
 	description = 'Clasificación, calendario y estadísticas de la Liga Local Elche.',
 } = Astro.props;
-const cardUrl = new URL('/icons/icon-512.png', Astro.url.origin);
+const cardUrl = new URL('/android-chrome-512x512.png', Astro.url.origin);
 ---
 
 <html lang="es">
 	<head>
 		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+		<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
 		<link rel="icon" href="/favicon.ico" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="generator" content={Astro.generator} />
 		<meta name="theme-color" content="#111827" />
 		<link rel="manifest" href="/manifest.webmanifest" />
-		<link rel="apple-touch-icon" href="/icons/icon-192.png" />
+		<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
 		<meta name="description" content={description} />
 		<meta property="og:type" content="website" />
 		<meta property="og:site_name" content="Liga Local Elche" />
