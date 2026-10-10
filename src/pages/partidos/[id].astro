@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import ThTooltip from '../../components/ThTooltip.astro';
+import TeamBadge from '../../components/TeamBadge.astro';
 import type { BoxScoreRow } from '../../lib/db';
 import { getMatch, getMatchBoxScore } from '../../lib/db';
 import { formatDate, formatTime, teamOutcome, type TeamOutcome } from '../../lib/format';
@@ -57,7 +58,42 @@ const nameClasses = (outcome: TeamOutcome | null, align: '' | 'text-right') => {
 	{
 		match ? (
 			<div class="mx-auto max-w-5xl px-4 py-8">
-				<p>
+				<div class="mt-3 flex items-center justify-between gap-3 sm:hidden">
+					<div class="flex min-w-0 flex-col text-sm text-gray-500">
+						<a
+							href="/calendario"
+							class="text-sm font-medium text-orange-600 hover:underline"
+						>
+							← Calendario
+						</a>
+						<div class="mt-1 flex items-center gap-x-2">
+							<span class="font-medium text-gray-700">
+								Jornada {match.week}
+							</span>
+							<span>·</span>
+							<span>{formatTime(match.time) || formatDate(match.date)}</span>
+						</div>
+					</div>
+					<span class="flex shrink-0 items-center gap-2">
+						<TeamBadge
+							bare
+							logoUrl={match.home_logo}
+							name={match.home_team}
+							shortName={match.home_short}
+						/>
+						<span class="font-display text-2xl tracking-widest text-black">
+							VS
+						</span>
+						<TeamBadge
+							bare
+							logoUrl={match.away_logo}
+							name={match.away_team}
+							shortName={match.away_short}
+						/>
+					</span>
+				</div>
+
+				<p class="hidden sm:block">
 					<a
 						href="/calendario"
 						class="text-sm font-medium text-orange-600 hover:underline"
@@ -66,7 +102,7 @@ const nameClasses = (outcome: TeamOutcome | null, align: '' | 'text-right') => {
 					</a>
 				</p>
 
-				<div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500">
+				<div class="mt-3 hidden flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500 sm:flex">
 					<span class="font-medium text-gray-700">
 						Jornada {match.week}
 					</span>
@@ -75,7 +111,7 @@ const nameClasses = (outcome: TeamOutcome | null, align: '' | 'text-right') => {
 				</div>
 
 				<div class="mt-4 flex items-center justify-between gap-2 rounded-2xl border border-gray-200 bg-white p-3 shadow-sm sm:gap-4 sm:p-5">
-					<div class="flex min-w-0 flex-1 items-center gap-2">
+					<div class="flex min-w-0 flex-1 items-center gap-2 sm:justify-between">
 						<span
 							class={nameClasses(homeOutcome, '')}
 							title={match.home_team}
@@ -84,11 +120,29 @@ const nameClasses = (outcome: TeamOutcome | null, align: '' | 'text-right') => {
 						>
 							{match.home_short}
 						</span>
+						<span class="hidden sm:inline-flex">
+							<TeamBadge
+								bare
+								size="lg"
+								logoUrl={match.home_logo}
+								name={match.home_team}
+								shortName={match.home_short}
+							/>
+						</span>
 					</div>
 					<span class="shrink-0 rounded-lg bg-gray-900 px-2.5 py-1 font-display text-xl tracking-wider text-white tabular-nums sm:rounded-xl sm:px-5 sm:py-2 sm:text-3xl">
 						{match.home_score ?? '–'} – {match.away_score ?? '–'}
 					</span>
-					<div class="flex min-w-0 flex-1 items-center justify-end gap-2">
+					<div class="flex min-w-0 flex-1 items-center justify-end gap-2 sm:justify-between">
+						<span class="hidden sm:inline-flex">
+							<TeamBadge
+								bare
+								size="lg"
+								logoUrl={match.away_logo}
+								name={match.away_team}
+								shortName={match.away_short}
+							/>
+						</span>
 						<span
 							class={nameClasses(awayOutcome, 'text-right')}
 							title={match.away_team}

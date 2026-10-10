@@ -4,9 +4,10 @@ interface Props {
 	name: string;
 	shortName: string;
 	size?: 'sm' | 'lg' | 'xl';
+	bare?: boolean;
 }
 
-const { logoUrl, name, shortName, size = 'sm' } = Astro.props;
+const { logoUrl, name, shortName, size = 'sm', bare = false } = Astro.props;
 
 const colors = [
 	'bg-orange-500',
@@ -29,17 +30,27 @@ const text =
 
 {
 	logoUrl ? (
-		<span
-			class={`inline-grid shrink-0 place-items-center rounded-xl bg-white ${tile} p-1.5`}
-		>
+		bare ? (
 			<img
 				src={logoUrl}
 				alt=""
 				loading="lazy"
 				decoding="async"
-				class="h-full w-full object-contain"
+				class={`shrink-0 object-contain ${tile}`}
 			/>
-		</span>
+		) : (
+			<span
+				class={`inline-grid shrink-0 place-items-center rounded-xl bg-white ${tile} p-1.5`}
+			>
+				<img
+					src={logoUrl}
+					alt=""
+					loading="lazy"
+					decoding="async"
+					class="h-full w-full object-contain"
+				/>
+			</span>
+		)
 	) : (
 		<span
 			class={`grid shrink-0 place-items-center rounded-xl font-bold text-white ${text} ${tile} ${colorFor(name)}`}

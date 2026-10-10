@@ -261,9 +261,11 @@ export interface MatchDetail {
 	home_id: number;
 	home_team: string;
 	home_short: string;
+	home_logo: string | null;
 	away_id: number;
 	away_team: string;
 	away_short: string;
+	away_logo: string | null;
 	forfeit_team_id: number | null;
 }
 
@@ -272,7 +274,9 @@ export async function getMatch(id: number): Promise<MatchDetail | null> {
 		.prepare(
 			`SELECT m.id, m.week, m.date, m.time, m.home_score, m.away_score, m.status,
 			        ht.id AS home_id, ht.name AS home_team, ht.short_name AS home_short,
+			        ht.logo_url AS home_logo,
 			        at.id AS away_id, at.name AS away_team, at.short_name AS away_short,
+			        at.logo_url AS away_logo,
 			        m.forfeit_team_id
 			 FROM matches m
 			 JOIN teams ht ON ht.id = m.home_team_id
