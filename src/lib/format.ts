@@ -22,7 +22,7 @@ export const headerTips: Record<string, string> = {
 	'2P': 'Tiros de 2 anotados',
 	'3P': 'Triples anotados',
 	TL: 'Tiros libres anotados',
-	TLA: 'Tiros libres intentados',
+	TLI: 'Tiros libres intentados',
 	'TL%': 'Porcentaje de tiros libres',
 	Fal: 'Faltas',
 	RACHA: 'Últimos 5 partidos',

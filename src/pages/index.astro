@@ -63,8 +63,13 @@ const standings = await getStandings(5);
 										</div>
 <div class="flex items-center justify-between gap-3">
 										<div class="flex min-w-0 flex-1 items-center gap-1.5">
-											<span class="truncate font-medium">
-												{m.home_team}
+											<span
+												class="truncate font-medium"
+												title={m.home_team}
+												data-name-full={m.home_team}
+												data-name-short={m.home_short}
+											>
+												{m.home_short}
 											</span>
 											{(() => {
 												const outcome = teamOutcome(m, 'home');
@@ -79,8 +84,13 @@ const standings = await getStandings(5);
 												const outcome = teamOutcome(m, 'away');
 												return outcome && <ResultBadge variant={outcome} />;
 											})()}
-											<span class="truncate text-right font-medium">
-												{m.away_team}
+											<span
+												class="truncate text-right font-medium"
+												title={m.away_team}
+												data-name-full={m.away_team}
+												data-name-short={m.away_short}
+											>
+												{m.away_short}
 											</span>
 										</div>
 									</div>
@@ -212,3 +222,7 @@ const standings = await getStandings(5);
 		}
 	</div>
 </Layout>
+
+<script>
+	import '../lib/team-names';
+</script>

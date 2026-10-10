@@ -104,11 +104,11 @@ progresses.
     «Diferencia de puntos», **PTS** «Puntos», **P** «Puntos», **Pts/PJ**
     «Puntos por partido»
   - **2P** «Tiros de 2 anotados», **3P** «Triples anotados», **TL**
-    «Tiros libres anotados», **TLA** «Tiros libres intentados», **TL%**
+    «Tiros libres anotados», **TLI** «Tiros libres intentados», **TL%**
     «Porcentaje de tiros libres», **Fal** «Faltas», **RACHA** «Últimos 5 partidos»
   - Applies to: Clasificación + Inicio standings (PJ/V/D/NP/PF/PC/±/PTS/RACHA), Jugadores
     (PJ), Equipos/`[id]` roster (PJ/Pts·PJ/2P/3P/TL%), Partido/`[id]` box score
-    (P/2P/3P/TL/TLA/Fal).
+    (P/2P/3P/TL/TLI/Fal).
 
 ### 10. Non-playing players — `played` column `planned` — depends on #5
 
