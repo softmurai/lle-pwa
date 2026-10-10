@@ -16,10 +16,10 @@ const standings = await getStandings(5);
 >
 	<div class="mx-auto max-w-5xl px-4 py-8">
 		<section
-			class="rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 px-6 py-8 text-white shadow-md"
+			class="rounded-2xl bg-gradient-to-br from-[#641B24] to-[#3D2340] px-6 py-8 text-white shadow-md"
 		>
 			<h1 class="font-display text-2xl tracking-wide sm:text-3xl">Liga Elche Baloncesto</h1>
-			<p class="mt-1 text-sm text-orange-100">
+			<p class="mt-1 text-sm text-white/80">
 				Partidos y estadísticas — actualizados cada sábado.
 			</p>
 		</section>
@@ -41,7 +41,7 @@ const standings = await getStandings(5);
 							</h2>
 							<a
 								href="/calendario"
-								class="text-sm font-medium text-orange-600 hover:underline"
+								class="text-sm font-medium text-[#79131f] hover:underline"
 							>
 								Todo el calendario →
 							</a>
@@ -106,7 +106,7 @@ const standings = await getStandings(5);
 								<h2 class="text-xl font-semibold">Clasificación</h2>
 								<a
 									href="/clasificacion"
-									class="text-sm font-medium text-orange-600 hover:underline"
+									class="text-sm font-medium text-[#79131f] hover:underline"
 								>
 									Ver completa →
 								</a>
@@ -140,7 +140,7 @@ const standings = await getStandings(5);
 												<td class="px-3 py-2.5 font-medium">
 													<a
 														href={`/equipos/${r.id}`}
-														class="text-gray-900 hover:text-orange-600 hover:underline"
+														class="text-gray-900 hover:text-[#79131f] hover:underline"
 													>
 														{r.name}
 													</a>

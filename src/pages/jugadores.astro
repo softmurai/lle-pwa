@@ -20,7 +20,7 @@ const players = await getAllPlayers();
 			data-filter-for="#players-table"
 			type="search"
 			placeholder="Buscar por nombre…"
-			class="mt-4 w-full max-w-md rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm shadow-sm outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
+			class="mt-4 w-full max-w-md rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm shadow-sm outline-none transition focus:border-[#641B24] focus:ring-2 focus:ring-[#641B24]/20"
 		/>
 
 		{
@@ -53,7 +53,7 @@ const players = await getAllPlayers();
 							{
 								players.map((p) => (
 									<tr
-										class="border-b border-gray-100 transition-colors last:border-0 hover:bg-orange-50"
+										class="border-b border-gray-100 transition-colors last:border-0 hover:bg-[#641B24]/5"
 										data-search={`${p.name} ${p.number ?? ''}`}
 										data-col0={p.name}
 										data-col1={p.team_name}
@@ -65,7 +65,7 @@ const players = await getAllPlayers();
 										<td class="px-3 py-2.5">
 											<a
 												href={`/equipos/${p.team_id}`}
-												class="text-orange-600 hover:underline"
+												class="text-[#79131f] hover:underline"
 											>
 												{p.team_name}
 											</a>
