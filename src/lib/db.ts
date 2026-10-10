@@ -145,6 +145,7 @@ export interface TeamRow {
 	id: number;
 	name: string;
 	short_name: string;
+	logo_url: string | null;
 	played: number;
 	wins: number;
 	losses: number;
@@ -153,7 +154,7 @@ export interface TeamRow {
 export async function getTeams(): Promise<TeamRow[]> {
 	const res = await env.lle_pwa
 		.prepare(
-			`SELECT t.id, t.name, t.short_name,
+			`SELECT t.id, t.name, t.short_name, t.logo_url,
 			        COALESCE(s.played, 0) AS played,
 			        COALESCE(s.wins, 0) AS wins,
 			        COALESCE(s.losses, 0) AS losses
@@ -168,7 +169,7 @@ export async function getTeams(): Promise<TeamRow[]> {
 export async function getTeam(id: number): Promise<TeamRow | null> {
 	const row = (await env.lle_pwa
 		.prepare(
-			`SELECT t.id, t.name, t.short_name,
+			`SELECT t.id, t.name, t.short_name, t.logo_url,
 			        COALESCE(s.played, 0) AS played,
 			        COALESCE(s.wins, 0) AS wins,
 			        COALESCE(s.losses, 0) AS losses

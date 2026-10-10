@@ -86,12 +86,19 @@ progresses.
 - New DB helper (e.g. `getTeamMatches(teamId)` reusing `matchesQuery`) that splits
   finished vs. scheduled; reuse `teamOutcome` for badges.
 
-### 8. "Ver acta" button on match detail `planned` — depends on image storage
+### 8. Match detail enhancements — acta, quarter graph, notes `planned` — acta depends on image storage
 
-- On `/partidos/[id]`, add a **"Ver acta"** button that shows the uploaded photo of
-  the official match report (acta).
-- Needs an image per match — storage decision open: repo assets for now vs. R2
-  (ties into the R2 nice-to-have below).
+On `/partidos/[id]`:
+
+- **"Ver acta" button** — shows the uploaded photo of the official match report
+  (acta). Needs an image per match — storage decision open: repo assets for now
+  vs. R2 (ties into the R2 nice-to-have below).
+- **Quarter-by-quarter result evolution graph** — chart the score differential
+  (or both scores) across Q1..Q4 + OT using the `home_q*`/`away_q*` columns
+  from #11 (blocked until they exist).
+- **"Observaciones / Notas"** — referee annotations for the game, displayed on
+  the match detail page. Needs a home in the schema (e.g. `matches.notes`)
+  and in the Excel→SQL workflow's `Acta` tab (#5/#14).
 
 ### 9. Hover tooltips on acronym table headers `done`
 
@@ -161,6 +168,11 @@ progresses.
   `migrations/0005_add_players_year.sql` and `scripts/seed-roster.mjs` (local + remote
   in sync). `matches`/`standings` mock kept for layout; `match_stats` regenerated so each
   team's player points sum to the stored scoreline.
+- **Done (2026-10-10):** Grayos roster corrected. `Fernando Marco López` (id 1226, 3 games)
+  replaced in place by `Jaime Marco Requena` (#3, so the games carry over); `Badre Kadi
+  El Megroud` (#0) and `Jorge Monge Valiente` (#1) added with no `match_stats` (render as
+  0 PJ); `D'Angelo` capitalization normalized. Applied local + remote via
+  `scripts/grayos-roster-update.sql`; `scripts/seed-roster.mjs` kept in sync.
 - **The engine-side items below targeted the removed importer and no longer apply as
   written** (#5, #14); kept as design notes for the Excel→SQL workflow.
 - Teams and players are uploaded to D1 manually (D1 Studio / SQL dump, per
@@ -170,9 +182,13 @@ progresses.
   non-unique name-within-team rather than taking an arbitrary row.
 - A typo'd team/player name (or a non-unique name) must be reported, not silently
   created or resolved to an arbitrary row.
-- Frees `short_name` to be a real abbreviation (today it is forced to a copy of
-  `name`), and lets `players.position` / `teams.logo_url` — both currently never
-  written — be populated.
+- Frees `short_name` to be a real abbreviation, and lets `players.position` /
+  `teams.logo_url` be populated.
+- **Done (2026-10-10):** `teams.logo_url` is now written — Emerge (id 1) and Grayos
+  (id 4) point at `/logos/*.svg`, served from R2 via the `MEDIA` binding
+  (`src/pages/logos/[file].ts`), set by `migrations/0006_seed_team_logos.sql`. See the
+  R2 section in `docs/deploy.md`. `src/components/TeamBadge.astro` renders the logo or
+  falls back to palette initials.
 - Consequence: a rename must be done in the DB, not the sheet. Document the procedure.
 
 ### 13. Prune stale imported rows `planned` — needed by #10 and #11
@@ -200,11 +216,33 @@ progresses.
 - Auth via **Cloudflare Access** (no hand-rolled login). The endpoint must **not** run
   arbitrary SQL: validate/whitelist the expected INSERT/upsert shape before executing.
 
+### 16. UI/PWA chrome fixes `planned`
+
+- Navbar: gradient treatment for the status area + general navbar fixes.
+- Footer color change.
+- Bottom safe-area padding for PWA — text clipped at screen borders
+  (viewport/`env(safe-area-inset-bottom)` issue).
+
+### 17. Inicio rework `planned`
+
+- Remove the orange banner.
+- Section titles in Bebas Neue: "Próxima Jornada", "Última Jornada",
+  "Clasificación".
+
+### 18. Fix PWA app logo on Android `planned`
+
+- The installed PWA logo renders incorrectly on Android (manifest icons /
+  maskable icon issue) — fix the icon set so the home-screen logo displays
+  correctly.
+
 ---
 
 ## Deferred / nice-to-haves (roadmap)
 
-- R2 cloud storage for images (logos, headshots, match photos) — use repo assets for now.
+- R2 cloud storage for images (logos, headshots, match photos). **Logos live (2026-10-10):**
+  bucket `lle-pwa-assets`, `MEDIA` binding, same-origin `/logos/*` route with CSP headers
+  (see `docs/deploy.md`). Headshots / match actas still pending — the R2 plumbing now exists
+  and #8's acta feature can reuse it.
 - Admin dashboard + login (Cloudflare Access if/when built) — no hand-rolled auth.
 - Extra stat tracking / schema refinements as the league requires.
 - Update README.md

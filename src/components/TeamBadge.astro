@@ -1,0 +1,50 @@
+---
+interface Props {
+	logoUrl: string | null;
+	name: string;
+	shortName: string;
+	size?: 'sm' | 'lg' | 'xl';
+}
+
+const { logoUrl, name, shortName, size = 'sm' } = Astro.props;
+
+const colors = [
+	'bg-orange-500',
+	'bg-blue-500',
+	'bg-emerald-600',
+	'bg-purple-600',
+	'bg-rose-500',
+	'bg-teal-600',
+	'bg-amber-600',
+	'bg-cyan-600',
+	'bg-pink-600',
+];
+const colorFor = (n: string) =>
+	colors[[...n].reduce((a, c) => a + c.charCodeAt(0), 0) % colors.length];
+
+const tile = size === 'lg' ? 'h-12 w-12' : size === 'xl' ? 'h-20 w-20' : 'h-11 w-11';
+const text =
+	size === 'lg' ? 'text-base' : size === 'xl' ? 'text-2xl' : 'text-sm';
+---
+
+{
+	logoUrl ? (
+		<span
+			class={`inline-grid shrink-0 place-items-center rounded-xl bg-white ${tile} p-1.5`}
+		>
+			<img
+				src={logoUrl}
+				alt=""
+				loading="lazy"
+				decoding="async"
+				class="h-full w-full object-contain"
+			/>
+		</span>
+	) : (
+		<span
+			class={`grid shrink-0 place-items-center rounded-xl font-bold text-white ${text} ${tile} ${colorFor(name)}`}
+		>
+			{shortName.toUpperCase()}
+		</span>
+	)
+}

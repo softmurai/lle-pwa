@@ -15,6 +15,12 @@
 			"database_id": "dc3dc314-c508-4a76-b919-6f92f86f891d"
 		}
 	],
+	"r2_buckets": [
+		{
+			"binding": "MEDIA",
+			"bucket_name": "lle-pwa-assets"
+		}
+	],
 	"observability": {
 		"enabled": true
 	}

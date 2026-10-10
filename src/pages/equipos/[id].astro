@@ -1,26 +1,13 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import ThTooltip from '../../components/ThTooltip.astro';
+import TeamBadge from '../../components/TeamBadge.astro';
 import { getTeam, getRoster } from '../../lib/db';
 
 const id = Number(Astro.params.id);
 const team = Number.isNaN(id) ? null : await getTeam(id);
 const roster = team ? await getRoster(id) : [];
 if (!team) Astro.response.status = 404;
-
-const colors = [
-	'bg-orange-500',
-	'bg-blue-500',
-	'bg-emerald-600',
-	'bg-purple-600',
-	'bg-rose-500',
-	'bg-teal-600',
-	'bg-amber-600',
-	'bg-cyan-600',
-	'bg-pink-600',
-];
-const colorFor = (name: string) =>
-	colors[[...name].reduce((a, c) => a + c.charCodeAt(0), 0) % colors.length];
 
 const statColumns = [
 	{ label: 'Nombre' },
@@ -50,38 +37,60 @@ const statColumns = [
 	{
 		team ? (
 			<div class="mx-auto max-w-5xl px-4 py-8">
-				<div class="flex items-center gap-3">
-					<span
-						class={[
-							'grid h-12 w-12 place-items-center rounded-xl text-base font-bold text-white',
-							colorFor(team.name),
-						].join(' ')}
-					>
-						{team.short_name.toUpperCase()}
-					</span>
-					<div>
-						<h1 class="font-display text-2xl tracking-wide">{team.name}</h1>
-						<p class="text-sm text-gray-500">
-							{team.wins} victorias · {team.losses} derrotas · {team.played}{' '}
-							{team.played === 1 ? 'partido' : 'partidos'}
-						</p>
+				<div class="flex items-stretch gap-4 sm:gap-6">
+					<div class="flex min-w-0 flex-1 flex-col sm:min-h-[8rem] sm:justify-between">
+						<h1 class="font-display text-2xl tracking-wide sm:text-5xl sm:leading-none">
+							{team.name}
+						</h1>
+						<div>
+							<p class="text-sm text-gray-500">
+								{team.wins} victorias · {team.losses} derrotas · {team.played}{' '}
+								{team.played === 1 ? 'partido' : 'partidos'}
+							</p>
+							<p class="mt-2">
+								<a
+									href="/equipos"
+									class="text-sm font-medium text-orange-600 hover:underline"
+								>
+									← Todos los equipos
+								</a>
+							</p>
+							<div class="mt-6 hidden w-full max-w-md sm:block">
+								<input
+									data-filter-for="#roster-table"
+									type="search"
+									placeholder="Buscar por nombre o dorsal…"
+									class="w-full max-w-md rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm shadow-sm outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
+								/>
+							</div>
+						</div>
 					</div>
+					{team.logo_url ? (
+						<div class="flex shrink-0 items-start pb-2 pr-2 sm:items-stretch sm:pb-4 sm:pr-4">
+							<img
+								src={team.logo_url}
+								alt=""
+								loading="lazy"
+								decoding="async"
+								class="h-24 w-24 object-contain sm:h-auto sm:w-40"
+							/>
+						</div>
+					) : (
+						<TeamBadge
+							logoUrl={null}
+							name={team.name}
+							shortName={team.short_name}
+							size="xl"
+						/>
+					)}
 				</div>
-				<p class="mt-2">
-					<a
-						href="/equipos"
-						class="text-sm font-medium text-orange-600 hover:underline"
-					>
-						← Todos los equipos
-					</a>
-				</p>
 
-				<div class="mt-6">
+				<div class="mt-2 w-full max-w-md sm:hidden">
 					<input
 						data-filter-for="#roster-table"
 						type="search"
 						placeholder="Buscar por nombre o dorsal…"
-						class="w-full max-w-md rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm shadow-sm outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
+						class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm shadow-sm outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
 					/>
 				</div>
 

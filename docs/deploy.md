@@ -61,3 +61,28 @@ consola de D1 de Cloudflare. Alternativa por CLI:
 ```bash
 npx wrangler d1 execute lle-pwa --remote --file=seed.sql
 ```
+
+## R2 (escudos / imágenes)
+
+Los logos de equipo se guardan en el bucket `lle-pwa-assets` (binding `MEDIA` en
+`wrangler.jsonc`) y se sirven same-origin vía `src/pages/logos/[file].ts` con cabeceras
+de cache y CSP. Cada equipo apunta a su `logo_url` en D1 (`D1 Studio` o SQL).
+
+Subir/actualizar un escudo (remoto y local para desarrollo):
+
+```bash
+npx wrangler r2 object put lle-pwa-assets/logos/emerge.svg \
+  --file="/ruta/escudo.svg" --content-type=image/svg+xml --remote
+npx wrangler r2 object put lle-pwa-assets/logos/emerge.svg \
+  --file="/ruta/escudo.svg" --content-type=image/svg+xml --local
+```
+
+Y actualizar el `logo_url` del equipo:
+
+```sql
+UPDATE teams SET logo_url = '/logos/<archivo>.svg' WHERE id = <team_id>;
+```
+
+Los nombres de objeto deben coincidir con `^[a-z0-9-]+\.svg$` (el route las valida).
+`migrations/0006_seed_team_logos.sql` es la referencia del mapeo inicial (Emerge id 1,
+Grayos id 4).

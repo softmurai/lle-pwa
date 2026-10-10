@@ -1,22 +1,9 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import TeamBadge from '../components/TeamBadge.astro';
 import { getTeams } from '../lib/db';
 
 const teams = await getTeams();
-
-const colors = [
-	'bg-orange-500',
-	'bg-blue-500',
-	'bg-emerald-600',
-	'bg-purple-600',
-	'bg-rose-500',
-	'bg-teal-600',
-	'bg-amber-600',
-	'bg-cyan-600',
-	'bg-pink-600',
-];
-const colorFor = (name: string) =>
-	colors[[...name].reduce((a, c) => a + c.charCodeAt(0), 0) % colors.length];
 ---
 
 <Layout
@@ -41,14 +28,7 @@ const colorFor = (name: string) =>
 								href={`/equipos/${t.id}`}
 								class="flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
 							>
-								<span
-									class={[
-										'grid h-11 w-11 shrink-0 place-items-center rounded-xl text-sm font-bold text-white',
-										colorFor(t.name),
-									].join(' ')}
-								>
-									{t.short_name.toUpperCase()}
-								</span>
+<TeamBadge logoUrl={t.logo_url} name={t.name} shortName={t.short_name} />
 								<span class="min-w-0">
 									<span
 										class="block truncate font-medium"
