@@ -34,3 +34,15 @@ th[data-sort].sorted-asc::after {
 th[data-sort].sorted-desc::after {
 	content: ' ↓';
 }
+
+thead th:nth-last-child(-n + 2) .group > .absolute {
+	left: auto;
+	right: 0;
+	translate: none;
+}
+
+thead th:nth-last-child(-n + 2) .group > .absolute > .absolute {
+	left: auto;
+	right: 0.5rem;
+	translate: none;
+}
