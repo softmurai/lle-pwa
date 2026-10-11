@@ -83,6 +83,19 @@ Y actualizar el `logo_url` del equipo:
 UPDATE teams SET logo_url = '/logos/<archivo>.svg' WHERE id = <team_id>;
 ```
 
-Los nombres de objeto deben coincidir con `^[a-z0-9-]+\.svg$` (el route las valida).
-`migrations/0006_seed_team_logos.sql` es la referencia del mapeo inicial (Emerge id 1,
-Grayos id 4).
+Los nombres de objeto deben coincidir con `^[a-z0-9-]+\.(svg|png|jpe?g|webp)$` (el route
+las valida y deriva el `Content-Type` de la extensión; sin acentos ni mayúsculas). El
+`--content-type` debe ser acorde: `image/svg+xml`, `image/png`, `image/jpeg` o `image/webp`.
+
+Mapeo de escudos (`teams.logo_url`), por id de equipo:
+
+| id | Equipo | Objeto R2 |
+|---|---|---|
+| 1 | Emerge Basket Club | `logos/emerge.svg` |
+| 3 | Chino Hills | `logos/chino.png` |
+| 4 | Grayos | `logos/grayos.svg` |
+| 7 | Ruskiñol | `logos/ruskinol.svg` |
+| 8 | Totonto Raptors | `logos/totonto.png` |
+
+Referencias: `migrations/0006_seed_team_logos.sql` (Emerge, Grayos) y
+`migrations/0009_seed_team_logos.sql` (Chino Hills, Ruskiñol, Totonto).
