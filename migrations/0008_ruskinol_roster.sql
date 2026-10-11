@@ -21,7 +21,7 @@ UPDATE players SET number = 9  WHERE team_id = (SELECT id FROM teams WHERE short
 UPDATE players SET number = 23 WHERE team_id = (SELECT id FROM teams WHERE short_name = 'Ruskiñol') AND name = 'Francisco López Sánchez';
 
 -- Ruskiñol: add three players (no year, no match_stats rows).
-INSERT INTO players (team_id, name, number, year) VALUES
+INSERT OR IGNORE INTO players (team_id, name, number, year) VALUES
   ((SELECT id FROM teams WHERE short_name = 'Ruskiñol'), 'Francisco Sánchez Pastor', 14, NULL),
   ((SELECT id FROM teams WHERE short_name = 'Ruskiñol'), 'Daniel García Francés', 12, NULL),
   ((SELECT id FROM teams WHERE short_name = 'Ruskiñol'), 'José Andrés Barreto Fernández', 33, NULL);
