@@ -18,10 +18,11 @@ progresses.
 
 ## Backlog
 
-### 1. Estadísticas — rework of "Jugadores" `planned`
+### 1. Estadísticas — rework of "Jugadores" `in progress`
 
-- Rename the "Jugadores" section/page and bottom-nav tab to "Estadísticas".
-- Update icon to a more fitting one.
+- Rename the "Jugadores" section/page and bottom-nav tab to "Estadísticas". `done`
+  - Route moved to `/estadisticas` (file `src/pages/estadisticas.astro`); `/jugadores` 301-redirects to it.
+  - Bottom-nav + desktop-nav labels updated; icon switched to Tabler `chart-bar`.
 - Leaderboards (new queries in `src/lib/db.ts`):
   - Puntos (score leaders)
   - Triples (3PM leaders)
