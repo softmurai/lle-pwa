@@ -236,6 +236,22 @@ On `/partidos/[id]`:
   maskable icon issue) — fix the icon set so the home-screen logo displays
   correctly.
 
+### 19. Match venue ("Lugar") `planned` — depends on #5/#14
+
+- Every match records the court it is played at: a fixed enum of league places,
+  each with a Google Maps link.
+- Storage: `matches.place TEXT`, constrained to the enum in `src/lib/places.ts`
+  (`key → { label, mapsUrl }`). No `venues` table.
+- Migration `0010_add_match_place.sql`: `ALTER TABLE matches ADD COLUMN place TEXT`;
+  backfill existing rows. The list of places (names + Maps links) is provided by the
+  user when this is implemented.
+- Queries: expose `place` from `matchesQuery` (`src/lib/db.ts:114`) and `getMatch`
+  (`src/lib/db.ts:275`); extend `MatchRow`/`MatchDetail`.
+- UI: Calendario match card (`src/pages/calendario.astro:47`) shows the place + Maps
+  link; `/partidos/[id]` shows it prominently; optionally Inicio "Próxima Jornada".
+- Excel→SQL workflow (#14) emits `place`; validation rejects unknown/missing place.
+  Rest weeks (#2) have none.
+
 ---
 
 ## Deferred / nice-to-haves (roadmap)

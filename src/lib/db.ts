@@ -186,7 +186,7 @@ export async function getTeam(id: number): Promise<TeamRow | null> {
 export interface PlayerStatRow {
 	id: number;
 	name: string;
-	number: number | null;
+	number: string | null;
 	games: number;
 	points: number;
 	avg_points: number | null;
@@ -226,7 +226,7 @@ export async function getRoster(teamId: number): Promise<PlayerStatRow[]> {
 export interface PlayerSearchRow {
 	id: number;
 	name: string;
-	number: number | null;
+	number: string | null;
 	team_id: number;
 	team_name: string;
 	games: number;
@@ -295,7 +295,7 @@ export interface BoxScoreRow {
 	team_short: string;
 	player_id: number;
 	player_name: string;
-	player_number: number | null;
+	player_number: string | null;
 	points: number;
 	fg: number;
 	three: number;
