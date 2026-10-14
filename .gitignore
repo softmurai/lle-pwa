@@ -31,3 +31,6 @@ pnpm-debug.log*
 
 # dev utilities
 scripts/
+
+# agent skills (reinstall with: npx autoskills -a universal)
+.agents/skills/
