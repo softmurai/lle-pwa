@@ -87,19 +87,20 @@ progresses.
 - New DB helper (e.g. `getTeamMatches(teamId)` reusing `matchesQuery`) that splits
   finished vs. scheduled; reuse `teamOutcome` for badges.
 
-### 8. Match detail enhancements — acta, quarter graph, notes `planned` — acta depends on image storage
+### 8. Match detail enhancements — acta, quarter graph, notes `in progress`
 
 On `/partidos/[id]`:
 
-- **"Ver acta" button** — shows the uploaded photo of the official match report
-  (acta). Needs an image per match — storage decision open: repo assets for now
-  vs. R2 (ties into the R2 nice-to-have below).
-- **Quarter-by-quarter result evolution graph** — chart the score differential
-  (or both scores) across Q1..Q4 + OT using the `home_q*`/`away_q*` columns
-  from #11 (blocked until they exist).
-- **"Observaciones / Notas"** — referee annotations for the game, displayed on
-  the match detail page. Needs a home in the schema (e.g. `matches.notes`)
-  and in the Excel→SQL workflow's `Acta` tab (#5/#14).
+- **"Ver acta" button** — `done` (2026-10-14). Uploaded acta photo stored in R2
+  (`acta_photo_key`); served same-origin via `src/pages/actas/[file].ts`; linked from
+  the match page. See #20.
+- **"Observaciones / Notas"** — `done` (2026-10-14). `matches.observations`, rendered
+  on the match page. See #20.
+- **"Aplazado/Adelantado desde …" badge** — `done` (2026-10-14). Derived from
+  `matches.original_date` vs `matches.date`. See #20.
+- **Quarter-by-quarter result evolution graph** — still `planned`; charts the score
+  differential (or both scores) across Q1..Q4 + OT using the `home_q*`/`away_q*`
+  columns from #11.
 
 ### 9. Hover tooltips on acronym table headers `done`
 
@@ -145,10 +146,10 @@ On `/partidos/[id]`:
   Recommended: an `Acta` tab (1 row per match) + an `Estadísticas` tab
   (1 row per player) + a non-imported `Jugadores` roster tab driving autofill.
   Layout is the user's call (#5); the Excel→SQL workflow adapts to whatever is exported.
-- DB: 16 flat nullable `INTEGER` columns on `matches` (migration `0006_*`; `0005` is
-  `players.year`, see #12);
-  SQLite backfills existing rows. `matchesQuery` (`src/lib/db.ts:111-127`) unchanged —
-  only `getMatch` (`src/lib/db.ts:269-285`) needs them, so Calendario/Inicio stay lean.
+- DB: 16 flat nullable `INTEGER` columns on `matches` — **now live:**
+  `migrations/0012_extend_matches.sql` (see #20). SQLite backfills existing rows.
+  `matchesQuery` (`src/lib/db.ts:111-127`) unchanged — only `getMatch`
+  (`src/lib/db.ts`) needs them, so Calendario/Inicio stay lean.
   Alternative: `match_periods(match_id, period, home, away)` — cleaner scoreboard
   UI and unlimited periods, but a new table + second query.
 - `forfeit_team` forces 20-0 → all quarter/OT columns to `NULL`.
@@ -210,12 +211,14 @@ On `/partidos/[id]`:
 - Consequence: the engine's `(team, name, number)` lookup fix and `ImportReport`
   changes (#12) no longer apply.
 
-### 15. Authenticated SQL-paste endpoint `planned` — ties to the Admin dashboard nice-to-have
+### 15. Authenticated SQL-paste endpoint `deferred` — superseded by #20
 
 - A URL with login where a pasted SQL payload updates matches/stats, instead of using
   the Cloudflare D1 console directly.
-- Auth via **Cloudflare Access** (no hand-rolled login). The endpoint must **not** run
-  arbitrary SQL: validate/whitelist the expected INSERT/upsert shape before executing.
+- Originally planned to use **Cloudflare Access**. Decision changed: auth is now
+  custom (see #20), so this would extend that login rather than introduce Access.
+- The Excel→SQL workflow (#14) is still pasted into the D1 console; routing it through
+  an authenticated endpoint here remains a nice-to-have.
 
 ### 16. UI/PWA chrome fixes `planned`
 
@@ -224,11 +227,22 @@ On `/partidos/[id]`:
 - Bottom safe-area padding for PWA — text clipped at screen borders
   (viewport/`env(safe-area-inset-bottom)` issue).
 
-### 17. Inicio rework `planned`
+### 17. Inicio rework `done` — 2026-10-15
 
-- Remove the orange banner.
-- Section titles in Bebas Neue: "Próxima Jornada", "Última Jornada",
-  "Clasificación".
+- Removed the `LIGA ELCHE BALONCESTO` banner.
+- Section titles in Bebas Neue: `PRÓXIMA JORNADA`, `ÚLTIMA JORNADA`, `CLASIFICACIÓN`.
+- `PRÓXIMA JORNADA` = `getUpcomingWeek(lastPlayedWeek)` — first week after the last
+  played one (all of week 1 before the season starts). `ÚLTIMA JORNADA` =
+  `getLastPlayedWeek()` (max week with a `finished`/`forfeit` match); the whole section
+  is hidden until at least one match has a result. Order: Próxima → Última → Clasificación.
+- Shared card layout extracted to `src/components/MatchGrid.astro`.
+
+### 17b. Unplayed-match score badge `done` — 2026-10-15
+
+- `src/components/ScoreBadge.astro` replaces the `– –` score chip. Played → `H – A`
+  (Bebas Neue, tabular); not played → `PRÓXIMAMENTE` (full) / `PRÓX.` (narrow screens,
+  `<640px`) with `title="Próximamente"`. Used on Inicio, Calendario (card variant) and
+  the match page (hero variant).
 
 ### 18. Fix PWA app logo on Android `planned`
 
@@ -236,37 +250,88 @@ On `/partidos/[id]`:
   maskable icon issue) — fix the icon set so the home-screen logo displays
   correctly.
 
-### 19. Match venue ("Lugar") `planned` — depends on #5/#14
+### 19. Match venue ("Lugar") `done` — implemented as the `venues` table (#20)
 
-- Every match records the court it is played at: a fixed enum of league places,
-  each with a Google Maps link.
-- Storage: `matches.place TEXT`, constrained to the enum in `src/lib/places.ts`
-  (`key → { label, mapsUrl }`). No `venues` table.
-- Migration `0010_add_match_place.sql`: `ALTER TABLE matches ADD COLUMN place TEXT`;
-  backfill existing rows. The list of places (names + Maps links) is provided by the
-  user when this is implemented.
-- Queries: expose `place` from `matchesQuery` (`src/lib/db.ts:114`) and `getMatch`
-  (`src/lib/db.ts:275`); extend `MatchRow`/`MatchDetail`.
-- UI: Calendario match card (`src/pages/calendario.astro:47`) shows the place + Maps
-  link; `/partidos/[id]` shows it prominently; optionally Inicio "Próxima Jornada".
-- Excel→SQL workflow (#14) emits `place`; validation rejects unknown/missing place.
-  Rest weeks (#2) have none.
+- Every match records the court it is played at. **Decision changed:** implemented as a
+  `venues` table (`migrations/0011_create_venues.sql`) with `matches.venue_id` FK
+  (`0012_extend_matches.sql`), not a `place TEXT` + `src/lib/places.ts` enum.
+- 5 venues seeded (`scripts/seed-calendar.sql`), each with a Google Maps URL; getters in
+  `src/lib/db.ts` (`getVenues`). Editable by admins in the Jornadas schedule board (#20).
+- Public surfacing `done` (2026-10-15): `MatchRow`/`MatchDetail` now join `venues`
+  (`venue_name`/`venue_short`/`venue_maps`). `src/components/VenueLink.astro` renders the
+  sede name as a Google Maps link (full name on ≥sm, `short_name` on mobile). The match
+  page shows it after the time, separated by `·` alongside Jornada/hour. Match cards
+  (Inicio + Calendario) were reverted to their original layout with no venue info.
+
+### 20. Admin panel — auth, actas, jornadas `in progress` — built 2026-10-14, local only
+
+Password-protected area at `/admin` (not linked from the public nav). Deployed: **no**
+— local-only so far; remote migrations not applied. Routes are network-only in the
+service worker (`public/sw.js`, `VERSION` → `lle-v5`).
+
+- **Auth (custom, replaces Cloudflare Access for this).** `src/lib/auth.ts` +
+  `migrations/0013_admin_auth.sql` (`admin_users`, `admin_sessions`): PBKDF2-SHA256
+  per-user salt, constant-time compare, 5-failure/15-min lockout, sliding 1 h idle +
+  8 h absolute sessions (`lle_admin` cookie, HttpOnly/SameSite=Strict, `Secure` only on
+  https). Users from the `ADMIN_USERS` secret (`.dev.vars` locally,
+  `scripts/gen-users.mjs`). Roles: `admin` and `referee`; middleware blocks referees
+  from `jornadas` pages and the schedule/postpone APIs. `Cache-Control: no-store` +
+  `X-Robots-Tag: noindex, nofollow`.
+- **Actas.** `admin/actas/*` + `components/admin/ActaForm.tsx` (React island) +
+  `api/admin/matches/[id]/results.ts`. Validates via one shared plain-TS module
+  (`src/lib/validation/match-acta.ts`): quarters+OT sum to final, player points sum to
+  team total, roster membership, fouls (≤5), TLI ≥ TLA, no ties, forfeit → 20-0 with
+  NULL quarters. Delete+reinsert `match_stats`, recompute `standings` in one batch.
+  Statuses: `scheduled` / `finished` / `forfeit` / `postponed` / `cancelled`.
+  Photo upload to R2 via `api/admin/matches/[id]/acta-photo.ts`.
+  - **Result only.** If only «Anotación por cuartos» is filled (no player stats), the main
+    **«Guardar acta»** button stays enabled but is relabelled
+    `⚠ Guardar solo resultado del partido` (amber) and saves the scoreline with no stats
+    (`resultOnly` flag skips `validateTeamStats`). As soon as any player stat is entered the
+    warning disappears and «Guardar acta» disables until the full acta validates. The week
+    list then shows an amber **«Pendiente estadísticas»** badge (finished + `stat_count = 0`)
+    instead of green «Registrado»; the row button reads «Completar estadísticas». Public
+    match page still shows the score with a "no stats yet" note.
+  - Successful save redirects to `/admin/actas/{week}`.
+  - Unsaved-changes guard: `components/admin/use-unsaved-changes.ts` (native
+    `beforeunload` only — link/logout/refresh/back/close). Used by the acta form and
+    the schedule board.
+  - Acta table columns (compact): `#`, Jugador, **Presentado** (checkbox), 2P, 3P,
+    **TLA**, **TLI**, Faltas (0–5 dropdown, keyboard-selectable), Pts. Footer sums the
+    player points («Suma puntuación jugadores», red when it doesn't match the score).
+    Each team's table spans the full width, stacked (local team first, then visitor) so
+    long names don't force horizontal scroll.
+- **Jornadas.** `admin/jornadas/cambiar.astro` + `components/admin/ScheduleBoard.tsx`:
+  edit date/time/venue and postpone. `matches.venue_id` (§#19), plus
+  `observations`, `acta_photo_key`, `original_date` (`0012_extend_matches.sql`).
+  `original_date` drives the "Aplazado/Adelantado" badge (§#8). Conflict detection
+  (`api/admin/jornadas/conflicts.ts`, `getTeamConflicts`/`getVenueConflicts`/
+  `getAvailableRainDates`) — **hard blocks** (409): a change that double-books a team
+  or a venue/time is rejected; the UI disables confirm while conflicts exist. Rain-date
+  suggestions come from `special_dates` (`0014_special_dates.sql`).
+- **Local data.** Migrations `0010` (rewritten FK-safe) and `0011`–`0014` applied to
+  local D1; `scripts/seed-calendar.sql` seeded 56 matches / 105 players / 5 venues /
+  20 special dates (match ids 109–164).
+- **Remaining.** Apply migrations + seed to remote, deploy, rotate the exposed
+  passwords, and do the mobile preview pass. Excel→SQL workflow (#14) still separate.
 
 ---
 
 ## Deferred / nice-to-haves (roadmap)
 
-- R2 cloud storage for images (logos, headshots, match photos). **Logos live (2026-10-10):**
-  bucket `lle-pwa-assets`, `MEDIA` binding, same-origin `/logos/*` route with CSP headers
-  (see `docs/deploy.md`). Headshots / match actas still pending — the R2 plumbing now exists
-  and #8's acta feature can reuse it.
-- Admin dashboard + login (Cloudflare Access if/when built) — no hand-rolled auth.
+- R2 cloud storage for images (logos, headshots, match photos). **Logos live (2026-10-10)**
+  and **acta photos live (2026-10-14)**: bucket `lle-pwa-assets`, `MEDIA` binding,
+  same-origin routes `/logos/*` and `/actas/*` with CSP headers (see `docs/deploy.md`).
+  Headshots still pending.
+- Admin dashboard + login — **built (2026-10-14)** as custom auth, not Cloudflare Access.
+  See #20.
 - Extra stat tracking / schema refinements as the league requires.
 - Update README.md
 
 ## Open items / not yet decided
 
-- Whether to build an admin dashboard after the MVP (Cloudflare Access or custom auth).
+- ~~Whether to build an admin dashboard after the MVP (Cloudflare Access or custom auth).~~
+  Decided 2026-10-14: custom auth + admin panel built (#20). Cloudflare Access dropped.
 - Final D1 schema details (indexes, exact stat columns tracked per player/match).
 - Season scoping: `teams.name` is `UNIQUE` and `matches` has no season column, so a
   second season with a different roster will collide. Worth deciding before the

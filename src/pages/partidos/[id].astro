@@ -2,6 +2,8 @@
 import Layout from '../../layouts/Layout.astro';
 import ThTooltip from '../../components/ThTooltip.astro';
 import TeamBadge from '../../components/TeamBadge.astro';
+import ScoreBadge from '../../components/ScoreBadge.astro';
+import VenueLink from '../../components/VenueLink.astro';
 import type { BoxScoreRow } from '../../lib/db';
 import { getMatch, getMatchBoxScore } from '../../lib/db';
 import { formatDate, formatTime, teamOutcome, type TeamOutcome } from '../../lib/format';
@@ -35,6 +37,12 @@ const boxColumns = [
 
 const homeOutcome = match ? teamOutcome(match, 'home') : null;
 const awayOutcome = match ? teamOutcome(match, 'away') : null;
+const movedLabel =
+	match?.original_date && match.original_date !== match.date
+		? match.date < match.original_date
+			? 'Adelantado'
+			: 'Aplazado'
+		: null;
 const nameClasses = (outcome: TeamOutcome | null, align: '' | 'text-right') => {
 	const base = `truncate font-display uppercase tracking-wide ${align}`;
 	if (!outcome) return `${base} text-lg`;
@@ -66,12 +74,23 @@ const nameClasses = (outcome: TeamOutcome | null, align: '' | 'text-right') => {
 						>
 							← Calendario
 						</a>
-						<div class="mt-1 flex items-center gap-x-2">
+						<div class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
 							<span class="font-medium text-gray-700">
 								Jornada {match.week}
 							</span>
 							<span>·</span>
 							<span>{formatTime(match.time) || formatDate(match.date)}</span>
+							{match.venue_name && (
+								<>
+									<span>·</span>
+									<VenueLink
+										name={match.venue_name}
+										short={match.venue_short}
+										mapsUrl={match.venue_maps}
+										class="hover:text-[#79131f] hover:underline"
+									/>
+								</>
+							)}
 						</div>
 					</div>
 					<span class="flex shrink-0 items-center gap-2">
@@ -112,6 +131,17 @@ const nameClasses = (outcome: TeamOutcome | null, align: '' | 'text-right') => {
 					</span>
 					<span>·</span>
 					<span>{formatTime(match.time) || formatDate(match.date)}</span>
+					{match.venue_name && (
+						<>
+							<span>·</span>
+							<VenueLink
+								name={match.venue_name}
+								short={match.venue_short}
+								mapsUrl={match.venue_maps}
+								class="hover:text-[#79131f] hover:underline"
+							/>
+						</>
+					)}
 				</div>
 
 				<div class="mt-4 flex items-center justify-between gap-2 rounded-2xl border border-gray-200 bg-white p-3 shadow-sm sm:gap-4 sm:p-5">
@@ -135,9 +165,7 @@ const nameClasses = (outcome: TeamOutcome | null, align: '' | 'text-right') => {
 							/>
 						</a>
 					</div>
-					<span class="shrink-0 rounded-lg bg-gray-900 px-2.5 py-1 font-display text-xl tracking-wider text-white tabular-nums sm:rounded-xl sm:px-5 sm:py-2 sm:text-3xl">
-						{match.home_score ?? '–'} – {match.away_score ?? '–'}
-					</span>
+					<ScoreBadge home={match.home_score} away={match.away_score} variant="hero" />
 					<div class="flex min-w-0 flex-1 items-center justify-end gap-2 sm:justify-between">
 						<a href={`/equipos/${match.away_id}`} class="hidden sm:inline-flex">
 							<TeamBadge
@@ -159,6 +187,39 @@ const nameClasses = (outcome: TeamOutcome | null, align: '' | 'text-right') => {
 						</a>
 					</div>
 				</div>
+
+				{
+					match && (movedLabel || match.observations || match.acta_photo_key) && (
+						<div class="mt-4 space-y-3">
+							{movedLabel && match.original_date && (
+								<p class="inline-flex items-center gap-1.5 rounded-lg bg-amber-100 px-3 py-1.5 text-sm text-amber-800">
+									<span class="font-semibold">{movedLabel}</span>
+									<span>desde {formatDate(match.original_date)}</span>
+								</p>
+							)}
+							{match.observations && (
+								<div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+									<h2 class="text-xs font-semibold tracking-wide text-gray-500 uppercase">
+										Observaciones
+									</h2>
+									<p class="mt-1 text-sm whitespace-pre-line text-gray-700">
+										{match.observations}
+									</p>
+								</div>
+							)}
+							{match.acta_photo_key && (
+								<a
+									href={`/${match.acta_photo_key}`}
+									target="_blank"
+									rel="noreferrer"
+									class="inline-flex items-center gap-1 text-sm font-medium text-[#79131f] hover:underline"
+								>
+									Ver acta del partido →
+								</a>
+							)}
+						</div>
+					)
+				}
 
 				{
 					rows.length === 0 ? (

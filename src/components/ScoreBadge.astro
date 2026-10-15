@@ -1,0 +1,41 @@
+---
+interface Props {
+	home: number | null;
+	away: number | null;
+	variant?: 'card' | 'hero';
+}
+
+const { home, away, variant = 'card' } = Astro.props;
+const played = home != null && away != null;
+
+const shell =
+	variant === 'hero'
+		? 'shrink-0 rounded-lg bg-gray-900 px-2.5 py-1 text-white sm:rounded-xl sm:px-5 sm:py-2'
+		: 'shrink-0 rounded-lg bg-gray-100 px-3 py-1';
+
+const size = played
+	? variant === 'hero'
+		? 'font-display text-xl tracking-wider tabular-nums sm:text-3xl'
+		: 'font-display text-lg tracking-wider tabular-nums'
+	: variant === 'hero'
+		? 'font-display text-base tracking-wide uppercase sm:text-2xl'
+		: 'font-display text-sm tracking-wide uppercase';
+
+const tone = played ? '' : variant === 'hero' ? 'text-white/90' : 'text-gray-400';
+---
+
+<span
+	class={[shell, size, tone].join(' ')}
+	title={played ? undefined : 'Próximamente'}
+>
+	{
+		played ? (
+			`${home} – ${away}`
+		) : (
+			<>
+				<span class="hidden sm:inline">PRÓXIMAMENTE</span>
+				<span class="sm:hidden">PRÓX.</span>
+			</>
+		)
+	}
+</span>

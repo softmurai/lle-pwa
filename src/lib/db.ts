@@ -106,6 +106,9 @@ export interface MatchRow {
 	home_short: string;
 	away_team: string;
 	away_short: string;
+	venue_name: string | null;
+	venue_short: string | null;
+	venue_maps: string | null;
 }
 
 async function matchesQuery(where = '', orderBy = '', bind: unknown[] = []): Promise<MatchRow[]> {
@@ -114,10 +117,12 @@ async function matchesQuery(where = '', orderBy = '', bind: unknown[] = []): Pro
 			`SELECT m.id, m.week, m.date, m.time, m.home_score, m.away_score, m.status,
 			        m.home_team_id AS home_id, m.away_team_id AS away_id, m.forfeit_team_id,
 			        ht.name AS home_team, ht.short_name AS home_short,
-			        at.name AS away_team, at.short_name AS away_short
+			        at.name AS away_team, at.short_name AS away_short,
+			        v.name AS venue_name, v.short_name AS venue_short, v.maps_url AS venue_maps
 			 FROM matches m
 			 JOIN teams ht ON ht.id = m.home_team_id
 			 JOIN teams at ON at.id = m.away_team_id
+			 LEFT JOIN venues v ON v.id = m.venue_id
 			 ${where}
 			 ${orderBy}`,
 		)
@@ -137,6 +142,27 @@ export function getAllMatches(): Promise<MatchRow[]> {
 export async function getLatestWeek(): Promise<number | null> {
 	const row = (await env.lle_pwa
 		.prepare('SELECT MAX(week) AS week FROM matches')
+		.first()) as { week: number | null } | null;
+	return row?.week ?? null;
+}
+
+export async function getLastPlayedWeek(): Promise<number | null> {
+	const row = (await env.lle_pwa
+		.prepare(
+			"SELECT MAX(week) AS week FROM matches WHERE status IN ('finished', 'forfeit')",
+		)
+		.first()) as { week: number | null } | null;
+	return row?.week ?? null;
+}
+
+export async function getUpcomingWeek(afterWeek: number | null): Promise<number | null> {
+	const row = (await env.lle_pwa
+		.prepare(
+			afterWeek === null
+				? 'SELECT MIN(week) AS week FROM matches'
+				: 'SELECT MIN(week) AS week FROM matches WHERE week > ?',
+		)
+		.bind(...(afterWeek === null ? [] : [afterWeek]))
 		.first()) as { week: number | null } | null;
 	return row?.week ?? null;
 }
@@ -267,6 +293,12 @@ export interface MatchDetail {
 	away_short: string;
 	away_logo: string | null;
 	forfeit_team_id: number | null;
+	observations: string | null;
+	acta_photo_key: string | null;
+	original_date: string | null;
+	venue_name: string | null;
+	venue_short: string | null;
+	venue_maps: string | null;
 }
 
 export async function getMatch(id: number): Promise<MatchDetail | null> {
@@ -277,10 +309,12 @@ export async function getMatch(id: number): Promise<MatchDetail | null> {
 			        ht.logo_url AS home_logo,
 			        at.id AS away_id, at.name AS away_team, at.short_name AS away_short,
 			        at.logo_url AS away_logo,
-			        m.forfeit_team_id
+			        m.forfeit_team_id, m.observations, m.acta_photo_key, m.original_date,
+			        v.name AS venue_name, v.short_name AS venue_short, v.maps_url AS venue_maps
 			 FROM matches m
 			 JOIN teams ht ON ht.id = m.home_team_id
 			 JOIN teams at ON at.id = m.away_team_id
+			 LEFT JOIN venues v ON v.id = m.venue_id
 			 WHERE m.id = ?
 			 LIMIT 1`,
 		)
@@ -321,4 +355,405 @@ export async function getMatchBoxScore(matchId: number): Promise<BoxScoreRow[]> 
 		.bind(matchId)
 		.all();
 	return res.results as unknown as BoxScoreRow[];
+}
+
+/* ------------------------------------------------------------------ */
+/* Admin                                                              */
+/* ------------------------------------------------------------------ */
+
+export interface VenueRow {
+	id: number;
+	name: string;
+	short_name: string;
+	maps_url: string | null;
+}
+
+export async function getVenues(): Promise<VenueRow[]> {
+	const res = await env.lle_pwa
+		.prepare('SELECT id, name, short_name, maps_url FROM venues ORDER BY name COLLATE NOCASE')
+		.all();
+	return res.results as unknown as VenueRow[];
+}
+
+export interface SpecialDateRow {
+	date: string;
+	type: string;
+	detail: string | null;
+}
+
+export async function getSpecialDates(): Promise<SpecialDateRow[]> {
+	const res = await env.lle_pwa
+		.prepare('SELECT date, type, detail FROM special_dates ORDER BY date')
+		.all();
+	return res.results as unknown as SpecialDateRow[];
+}
+
+export interface AdminMatchRow {
+	id: number;
+	week: number;
+	date: string;
+	time: string | null;
+	home_score: number | null;
+	away_score: number | null;
+	status: string;
+	home_id: number;
+	home_team: string;
+	home_short: string;
+	away_id: number;
+	away_team: string;
+	away_short: string;
+	forfeit_team_id: number | null;
+	venue_id: number | null;
+	venue_name: string | null;
+	venue_short: string | null;
+	venue_maps: string | null;
+	original_date: string | null;
+	home_q1: number | null;
+	home_q2: number | null;
+	home_q3: number | null;
+	home_q4: number | null;
+	away_q1: number | null;
+	away_q2: number | null;
+	away_q3: number | null;
+	away_q4: number | null;
+	home_ot1: number | null;
+	home_ot2: number | null;
+	home_ot3: number | null;
+	away_ot1: number | null;
+	away_ot2: number | null;
+	away_ot3: number | null;
+	observations: string | null;
+	acta_photo_key: string | null;
+	stat_count: number;
+}
+
+const ADMIN_MATCH_COLUMNS = `
+	m.id, m.week, m.date, m.time, m.home_score, m.away_score, m.status,
+	m.home_team_id AS home_id, m.away_team_id AS away_id, m.forfeit_team_id,
+	ht.name AS home_team, ht.short_name AS home_short,
+	at.name AS away_team, at.short_name AS away_short,
+	m.venue_id, v.name AS venue_name, v.short_name AS venue_short, v.maps_url AS venue_maps,
+	m.original_date,
+	m.home_q1, m.home_q2, m.home_q3, m.home_q4,
+	m.away_q1, m.away_q2, m.away_q3, m.away_q4,
+	m.home_ot1, m.home_ot2, m.home_ot3,
+	m.away_ot1, m.away_ot2, m.away_ot3,
+	m.observations, m.acta_photo_key,
+	(SELECT COUNT(*) FROM match_stats ms WHERE ms.match_id = m.id) AS stat_count`;
+
+export async function getMatchesByWeek(week: number): Promise<AdminMatchRow[]> {
+	const res = await env.lle_pwa
+		.prepare(
+			`SELECT ${ADMIN_MATCH_COLUMNS}
+			 FROM matches m
+			 JOIN teams ht ON ht.id = m.home_team_id
+			 JOIN teams at ON at.id = m.away_team_id
+			 LEFT JOIN venues v ON v.id = m.venue_id
+			 WHERE m.week = ?
+			 ORDER BY m.time ASC, m.date ASC`,
+		)
+		.bind(week)
+		.all();
+	return res.results as unknown as AdminMatchRow[];
+}
+
+export async function getAdminMatch(id: number): Promise<AdminMatchRow | null> {
+	const row = (await env.lle_pwa
+		.prepare(
+			`SELECT ${ADMIN_MATCH_COLUMNS}
+			 FROM matches m
+			 JOIN teams ht ON ht.id = m.home_team_id
+			 JOIN teams at ON at.id = m.away_team_id
+			 LEFT JOIN venues v ON v.id = m.venue_id
+			 WHERE m.id = ?
+			 LIMIT 1`,
+		)
+		.bind(id)
+		.first()) as AdminMatchRow | null;
+	return row;
+}
+
+export interface JornadaRow {
+	week: number;
+	first_date: string;
+	last_date: string;
+	total: number;
+	played: number;
+	pending: number;
+}
+
+export async function getJornadas(): Promise<JornadaRow[]> {
+	const res = await env.lle_pwa
+		.prepare(
+			`SELECT week, MIN(date) AS first_date, MAX(date) AS last_date,
+			        COUNT(*) AS total,
+			        SUM(CASE WHEN status IN ('finished','forfeit') THEN 1 ELSE 0 END) AS played,
+			        SUM(CASE WHEN status = 'scheduled' THEN 1 ELSE 0 END) AS pending
+			 FROM matches
+			 GROUP BY week
+			 ORDER BY week`,
+		)
+		.all();
+	return res.results as unknown as JornadaRow[];
+}
+
+export interface TeamPlayerRow {
+	id: number;
+	name: string;
+	number: string | null;
+}
+
+/** Roster ordered by dorsal (numeric), players without a number last. */
+export async function getTeamPlayers(teamId: number): Promise<TeamPlayerRow[]> {
+	const res = await env.lle_pwa
+		.prepare(
+			`SELECT id, name, number
+			 FROM players
+			 WHERE team_id = ?
+			 ORDER BY (number IS NULL OR number = ''), CAST(number AS INTEGER), number, name COLLATE NOCASE`,
+		)
+		.bind(teamId)
+		.all();
+	return res.results as unknown as TeamPlayerRow[];
+}
+
+export interface MatchStatRow {
+	player_id: number;
+	points: number;
+	fg2: number;
+	fg3: number;
+	ftm: number;
+	fta: number;
+	fouls: number;
+}
+
+export async function getMatchStats(matchId: number): Promise<MatchStatRow[]> {
+	const res = await env.lle_pwa
+		.prepare(
+			`SELECT player_id, points,
+			        field_goals_made AS fg2, three_pt_made AS fg3,
+			        free_throws_made AS ftm, free_throws_attempted AS fta,
+			        fouls
+			 FROM match_stats
+			 WHERE match_id = ?`,
+		)
+		.bind(matchId)
+		.all();
+	return res.results as unknown as MatchStatRow[];
+}
+
+export interface ConflictMatch {
+	id: number;
+	week: number;
+	date: string;
+	time: string | null;
+	home_team: string;
+	away_team: string;
+}
+
+/** Other matches on `date` that involve either team. */
+export async function getTeamConflicts(
+	matchId: number,
+	homeId: number,
+	awayId: number,
+	date: string,
+): Promise<ConflictMatch[]> {
+	const res = await env.lle_pwa
+		.prepare(
+			`SELECT m.id, m.week, m.date, m.time,
+			        ht.name AS home_team, at.name AS away_team
+			 FROM matches m
+			 JOIN teams ht ON ht.id = m.home_team_id
+			 JOIN teams at ON at.id = m.away_team_id
+			 WHERE m.date = ?
+			   AND m.id != ?
+			   AND (m.home_team_id IN (?, ?) OR m.away_team_id IN (?, ?))
+			 ORDER BY m.time`,
+		)
+		.bind(date, matchId, homeId, awayId, homeId, awayId)
+		.all();
+	return res.results as unknown as ConflictMatch[];
+}
+
+/** Other matches at the same venue and time on `date`. */
+export async function getVenueConflicts(
+	matchId: number,
+	venueId: number | null,
+	date: string,
+	time: string | null,
+): Promise<ConflictMatch[]> {
+	if (!venueId || !time) return [];
+	const res = await env.lle_pwa
+		.prepare(
+			`SELECT m.id, m.week, m.date, m.time,
+			        ht.name AS home_team, at.name AS away_team
+			 FROM matches m
+			 JOIN teams ht ON ht.id = m.home_team_id
+			 JOIN teams at ON at.id = m.away_team_id
+			 WHERE m.venue_id = ? AND m.date = ? AND m.time = ? AND m.id != ?
+			 ORDER BY m.week`,
+		)
+		.bind(venueId, date, time, matchId)
+		.all();
+	return res.results as unknown as ConflictMatch[];
+}
+
+/** Free reserved (lluvia) dates: in the future and neither team plays that day. */
+export async function getAvailableRainDates(
+	homeId: number,
+	awayId: number,
+	fromDate: string,
+): Promise<SpecialDateRow[]> {
+	const res = await env.lle_pwa
+		.prepare(
+			`SELECT date, type, detail
+			 FROM special_dates
+			 WHERE type = 'lluvia'
+			   AND date >= ?
+			   AND date NOT IN (
+			     SELECT date FROM matches
+			     WHERE home_team_id IN (?, ?) OR away_team_id IN (?, ?)
+			   )
+			 ORDER BY date`,
+		)
+		.bind(fromDate, homeId, awayId, homeId, awayId)
+		.all();
+	return res.results as unknown as SpecialDateRow[];
+}
+
+export interface ScheduleChange {
+	date: string;
+	time: string | null;
+	venue_id: number | null;
+}
+
+/** Updates date/time/venue, tracking the original date for the aplazado/adelantado badge. */
+export async function applyScheduleChange(
+	matchId: number,
+	change: ScheduleChange,
+): Promise<void> {
+	const current = (await env.lle_pwa
+		.prepare('SELECT date, original_date FROM matches WHERE id = ?')
+		.bind(matchId)
+		.first()) as { date: string; original_date: string | null } | null;
+	if (!current) return;
+
+	let original = current.original_date;
+	if (change.date !== current.date) {
+		original = original ?? current.date;
+	}
+	if (original && change.date === original) {
+		original = null; // moved back to the original date: no badge
+	}
+
+	await env.lle_pwa
+		.prepare('UPDATE matches SET date = ?, time = ?, venue_id = ?, original_date = ? WHERE id = ?')
+		.bind(change.date, change.time, change.venue_id, original, matchId)
+		.run();
+}
+
+/** Recomputes the standings cache from every finished/forfeit match. */
+export async function recomputeStandings(): Promise<void> {
+	const res = await env.lle_pwa
+		.prepare(
+			`SELECT home_team_id, away_team_id, home_score, away_score, status, forfeit_team_id
+			 FROM matches
+			 WHERE status IN ('finished', 'forfeit')`,
+		)
+		.all();
+
+	type Acc = { played: number; wins: number; losses: number; pf: number; pa: number; points: number };
+	const acc = new Map<number, Acc>();
+	const get = (id: number): Acc => {
+		let a = acc.get(id);
+		if (!a) {
+			a = { played: 0, wins: 0, losses: 0, pf: 0, pa: 0, points: 0 };
+			acc.set(id, a);
+		}
+		return a;
+	};
+
+	for (const raw of res.results as unknown as {
+		home_team_id: number;
+		away_team_id: number;
+		home_score: number | null;
+		away_score: number | null;
+		status: string;
+		forfeit_team_id: number | null;
+	}[]) {
+		const home = get(raw.home_team_id);
+		const away = get(raw.away_team_id);
+
+		if (raw.status === 'forfeit') {
+			const homeForfeits = raw.forfeit_team_id === raw.home_team_id;
+			home.played++;
+			away.played++;
+			if (homeForfeits) {
+				home.losses++;
+				away.wins++;
+				home.pf += 0;
+				home.pa += 20;
+				away.pf += 20;
+				away.pa += 0;
+				away.points += 2;
+			} else {
+				away.losses++;
+				home.wins++;
+				away.pf += 0;
+				away.pa += 20;
+				home.pf += 20;
+				home.pa += 0;
+				home.points += 2;
+			}
+			continue;
+		}
+
+		const hs = raw.home_score ?? 0;
+		const as_ = raw.away_score ?? 0;
+		home.played++;
+		away.played++;
+		home.pf += hs;
+		home.pa += as_;
+		away.pf += as_;
+		away.pa += hs;
+		if (hs > as_) {
+			home.wins++;
+			away.losses++;
+			home.points += 2;
+			away.points += 1;
+		} else if (as_ > hs) {
+			away.wins++;
+			home.losses++;
+			away.points += 2;
+			home.points += 1;
+		}
+	}
+
+	const stmts = [...acc.entries()].map(([teamId, a]) =>
+		env.lle_pwa
+			.prepare(
+				`UPDATE standings SET played = ?, wins = ?, losses = ?, points_for = ?, points_against = ?, points = ?
+				 WHERE team_id = ?`,
+			)
+			.bind(a.played, a.wins, a.losses, a.pf, a.pa, a.points, teamId),
+	);
+	if (stmts.length) await env.lle_pwa.batch(stmts);
+}
+
+/** Wipes the stored result of a match (scores, quarters, OT and player stats). */
+export function clearResultStatements(matchId: number): D1PreparedStatement[] {
+	return [
+		env.lle_pwa
+			.prepare(
+				`UPDATE matches SET
+					home_score = NULL, away_score = NULL,
+					home_q1 = NULL, home_q2 = NULL, home_q3 = NULL, home_q4 = NULL,
+					away_q1 = NULL, away_q2 = NULL, away_q3 = NULL, away_q4 = NULL,
+					home_ot1 = NULL, home_ot2 = NULL, home_ot3 = NULL,
+					away_ot1 = NULL, away_ot2 = NULL, away_ot3 = NULL
+				 WHERE id = ?`,
+			)
+			.bind(matchId),
+		env.lle_pwa.prepare('DELETE FROM match_stats WHERE match_id = ?').bind(matchId),
+	];
 }

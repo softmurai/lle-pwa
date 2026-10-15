@@ -1,0 +1,45 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { getJornadas } from '../../../lib/db';
+
+export const prerender = false;
+
+const jornadas = await getJornadas();
+const fmt = (iso: string) =>
+	new Date(`${iso}T00:00:00`).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+---
+
+<AdminLayout title="Registrar actas">
+	<h1 class="font-display text-3xl tracking-wide text-[#641B24]">Registrar actas</h1>
+	<p class="mt-1 text-sm text-gray-600">Selecciona una jornada para registrar sus resultados.</p>
+
+	<div class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+		{
+			jornadas.map((j) => (
+				<a
+					href={`/admin/actas/${j.week}`}
+					class="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm transition-all hover:border-[#641B24]/40 hover:shadow-md"
+				>
+					<div class="flex items-center justify-between">
+						<span class="font-display text-xl tracking-wide text-[#641B24]">Jornada {j.week}</span>
+						{j.pending === 0 ? (
+							<span class="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
+								Completa
+							</span>
+						) : (
+							<span class="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
+								{j.pending} pendientes
+							</span>
+						)}
+					</div>
+					<p class="mt-1 text-sm text-gray-500">
+						{j.first_date === j.last_date
+							? fmt(j.first_date)
+							: `${fmt(j.first_date)} – ${fmt(j.last_date)}`}
+						· {j.played}/{j.total} registrados
+					</p>
+				</a>
+			))
+		}
+	</div>
+</AdminLayout>

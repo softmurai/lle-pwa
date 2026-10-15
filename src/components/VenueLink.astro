@@ -1,0 +1,29 @@
+---
+interface Props {
+	name: string | null;
+	short: string | null;
+	mapsUrl: string | null;
+	class?: string;
+}
+
+const { name, short, mapsUrl, class: cls = '' } = Astro.props;
+const shortLabel = short ?? name;
+---
+
+{
+	name && (
+		<>
+			{mapsUrl ? (
+				<a href={mapsUrl} target="_blank" rel="noreferrer" title={name} class={cls}>
+					<span class="hidden sm:inline">{name}</span>
+					<span class="sm:hidden">{shortLabel}</span>
+				</a>
+			) : (
+				<span title={name} class={cls}>
+					<span class="hidden sm:inline">{name}</span>
+					<span class="sm:hidden">{shortLabel}</span>
+				</span>
+			)}
+		</>
+	)
+}

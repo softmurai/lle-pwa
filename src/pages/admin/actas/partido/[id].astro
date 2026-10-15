@@ -1,0 +1,58 @@
+---
+import AdminLayout from '../../../../layouts/AdminLayout.astro';
+import { getAdminMatch, getTeamPlayers, getMatchStats } from '../../../../lib/db';
+import ActaForm from '../../../../components/admin/ActaForm.tsx';
+
+export const prerender = false;
+
+const idParam = Astro.params.id ?? '';
+const matchId = Number.parseInt(idParam, 10);
+if (!Number.isInteger(matchId)) {
+	return Astro.redirect('/admin/actas');
+}
+
+const match = await getAdminMatch(matchId);
+if (!match) {
+	return new Response('Partido no encontrado', { status: 404 });
+}
+
+const [homePlayers, awayPlayers, stats] = await Promise.all([
+	getTeamPlayers(match.home_id),
+	getTeamPlayers(match.away_id),
+	getMatchStats(matchId),
+]);
+
+const props = {
+	match,
+	homePlayers,
+	awayPlayers,
+	stats,
+};
+
+const fmtDate = (iso: string) =>
+	new Date(`${iso}T00:00:00`).toLocaleDateString('es-ES', {
+		weekday: 'long',
+		day: 'numeric',
+		month: 'long',
+	});
+---
+
+<AdminLayout title="Acta">
+	<p class="text-sm text-gray-500">
+		<a href={`/admin/actas/${match.week}`} class="hover:underline">
+			← Jornada {match.week}
+		</a>
+	</p>
+	<div class="mt-1 flex flex-wrap items-baseline justify-between gap-2">
+		<h1 class="font-display text-3xl tracking-wide text-[#641B24]">
+			{match.home_team} <span class="text-gray-400">vs</span> {match.away_team}
+		</h1>
+		<p class="text-sm text-gray-500">
+			{fmtDate(match.date)} · {match.time}{match.venue_name ? ` · ${match.venue_name}` : ''}
+		</p>
+	</div>
+
+	<div class="mt-6">
+		<ActaForm {...props} client:load />
+	</div>
+</AdminLayout>

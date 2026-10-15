@@ -1,0 +1,81 @@
+---
+import '../styles/global.css';
+
+interface Props {
+	title: string;
+}
+
+const { title } = Astro.props;
+const admin = Astro.locals.admin;
+const pathname = Astro.url.pathname;
+
+Astro.response.headers.set('Cache-Control', 'no-store');
+Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+
+const links = [
+	{ href: '/admin/dashboard', label: 'Inicio' },
+	...(admin?.role === 'admin'
+		? [{ href: '/admin/jornadas/cambiar', label: 'Cambio de jornadas' }]
+		: []),
+	{ href: '/admin/actas', label: 'Registrar actas' },
+];
+const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
+---
+
+<html lang="es">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="robots" content="noindex, nofollow" />
+		<meta name="theme-color" content="#641B24" />
+		<title>{title} · Admin</title>
+	</head>
+	<body class="min-h-screen bg-gray-100 text-gray-900 antialiased">
+		<header
+			class="sticky top-0 z-20 border-b border-gray-800 bg-gradient-to-b from-[#641B24] to-[#3D2340] text-white shadow-md"
+		>
+			<div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-2">
+				<div class="flex items-center gap-3">
+					<span class="font-display text-lg tracking-wide">Liga Local · Admin</span>
+				</div>
+				<nav class="order-3 flex w-full items-center gap-1 md:order-none md:w-auto">
+					{
+						links.map((l) => (
+							<a
+								href={l.href}
+								aria-current={isActive(l.href) ? 'page' : undefined}
+								class={
+									isActive(l.href)
+										? 'rounded-lg bg-white/15 px-3 py-1.5 text-sm font-medium text-white'
+										: 'rounded-lg px-3 py-1.5 text-sm text-gray-300 transition-colors hover:bg-white/10 hover:text-white'
+								}
+							>
+								{l.label}
+							</a>
+						))
+					}
+				</nav>
+				<div class="flex items-center gap-3 text-sm">
+					<span class="text-gray-300">
+						{admin?.username}
+						<span class="ml-1 rounded bg-white/10 px-1.5 py-0.5 text-xs">
+							{admin?.role === 'referee' ? 'árbitro' : 'admin'}
+						</span>
+					</span>
+					<form method="POST" action="/api/admin/logout">
+						<button
+							type="submit"
+							class="rounded-lg border border-white/20 px-3 py-1.5 text-sm transition-colors hover:bg-white/10"
+						>
+							Cerrar sesión
+						</button>
+					</form>
+				</div>
+			</div>
+		</header>
+		<main class="mx-auto max-w-6xl px-4 py-6">
+			<slot />
+		</main>
+	</body>
+</html>

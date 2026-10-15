@@ -1,0 +1,92 @@
+---
+import '../../styles/global.css';
+import { SESSION_COOKIE, verifySession } from '../../lib/auth';
+
+export const prerender = false;
+
+const next = Astro.url.searchParams.get('next') ?? '';
+const error = Astro.url.searchParams.get('error');
+
+const token = Astro.cookies.get(SESSION_COOKIE)?.value;
+const session = await verifySession(token);
+if (session.valid) {
+	return Astro.redirect('/admin/dashboard');
+}
+
+Astro.response.headers.set('Cache-Control', 'no-store');
+Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+
+const errorMessages: Record<string, string> = {
+	invalid: 'Usuario o contraseña incorrectos.',
+	missing: 'Introduce usuario y contraseña.',
+	locked: 'Demasiados intentos fallidos. Prueba de nuevo en unos minutos.',
+};
+const errorText = error ? (errorMessages[error] ?? 'No se pudo iniciar sesión.') : null;
+---
+
+<html lang="es">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="robots" content="noindex, nofollow" />
+		<meta name="theme-color" content="#641B24" />
+		<title>Acceso · Liga Local</title>
+	</head>
+	<body
+		class="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#641B24] to-[#3D2340] px-4 antialiased"
+	>
+		<main class="w-full max-w-sm">
+			<div class="mb-6 text-center text-white">
+				<h1 class="font-display text-4xl tracking-wide">LIGA LOCAL</h1>
+				<p class="mt-1 text-sm text-gray-300">Panel de administración</p>
+			</div>
+			<form
+				method="POST"
+				action="/api/admin/login"
+				class="space-y-4 rounded-2xl bg-white p-6 shadow-xl"
+			>
+				<input type="hidden" name="next" value={next} />
+				{
+					errorText && (
+						<p
+							class="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+							role="alert"
+						>
+							{errorText}
+						</p>
+					)
+				}
+				<div>
+					<label for="username" class="mb-1 block text-sm font-medium text-gray-700">Usuario</label>
+					<input
+						id="username"
+						name="username"
+						type="text"
+						autocomplete="username"
+						required
+						autofocus
+						class="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 focus:border-[#641B24] focus:ring-2 focus:ring-[#641B24]/20 focus:outline-none"
+					/>
+				</div>
+				<div>
+					<label for="password" class="mb-1 block text-sm font-medium text-gray-700">Contraseña</label>
+					<input
+						id="password"
+						name="password"
+						type="password"
+						autocomplete="current-password"
+						required
+						class="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 focus:border-[#641B24] focus:ring-2 focus:ring-[#641B24]/20 focus:outline-none"
+					/>
+				</div>
+				<button
+					type="submit"
+					class="w-full rounded-lg bg-[#641B24] px-4 py-2.5 font-medium text-white transition-colors hover:bg-[#7a2130] focus:ring-2 focus:ring-[#641B24]/40 focus:outline-none"
+				>
+					Entrar
+				</button>
+			</form>
+		</main>
+	</body>
+</html>

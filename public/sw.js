@@ -1,4 +1,4 @@
-const VERSION = 'lle-v4';
+const VERSION = 'lle-v5';
 const ASSET_CACHE = `assets-${VERSION}`;
 const PAGE_CACHE = `pages-${VERSION}`;
 const CORE_ASSETS = [
@@ -39,6 +39,11 @@ self.addEventListener('fetch', (event) => {
 	const url = new URL(request.url);
 	if (url.origin !== self.origin) return;
 	if (url.pathname === '/sw.js') return;
+
+	// Admin y API: siempre red, nunca caché (contenido privado/dinámico).
+	if (url.pathname === '/admin' || url.pathname.startsWith('/admin/') || url.pathname.startsWith('/api/')) {
+		return;
+	}
 
 	// Navegación: red primero, caemos a caché o a la página de inicio/offline
 	if (request.mode === 'navigate') {

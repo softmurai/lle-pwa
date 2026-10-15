@@ -1,0 +1,67 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { getJornadas, getMatchesByWeek, getVenues, getSpecialDates } from '../../../lib/db';
+import ScheduleBoard from '../../../components/admin/ScheduleBoard.tsx';
+
+export const prerender = false;
+
+const jornadas = await getJornadas();
+
+const requested = Number.parseInt(Astro.url.searchParams.get('week') ?? '', 10);
+const defaultWeek =
+	jornadas.find((j) => j.pending > 0)?.week ?? jornadas[0]?.week ?? 1;
+const week = Number.isInteger(requested) ? requested : defaultWeek;
+
+const [matches, venues, specialDates] = await Promise.all([
+	getMatchesByWeek(week),
+	getVenues(),
+	getSpecialDates(),
+]);
+
+const fmtRange = (j: (typeof jornadas)[number]) =>
+	j.first_date === j.last_date
+		? new Date(`${j.first_date}T00:00:00`).toLocaleDateString('es-ES', {
+				day: 'numeric',
+				month: 'short',
+			})
+		: `${new Date(`${j.first_date}T00:00:00`).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })} – ${new Date(`${j.last_date}T00:00:00`).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}`;
+---
+
+<AdminLayout title="Cambio de jornadas">
+	<div class="flex flex-wrap items-end justify-between gap-3">
+		<div>
+			<h1 class="font-display text-3xl tracking-wide text-[#641B24]">Cambio de jornadas</h1>
+			<p class="mt-1 text-sm text-gray-600">
+				Cambia el día, la hora o la sede de un partido, o aplázalo con aviso de conflictos.
+			</p>
+		</div>
+		<label class="text-sm">
+			<span class="mb-1 block text-xs text-gray-500">Jornada</span>
+			<select
+				id="week-select"
+				class="rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-[#641B24] focus:outline-none"
+			>
+				{
+					jornadas.map((j) => (
+						<option value={j.week} selected={j.week === week}>
+							Jornada {j.week} · {fmtRange(j)}
+						</option>
+					))
+				}
+			</select>
+		</label>
+	</div>
+
+	<div class="mt-6">
+		<ScheduleBoard week={week} matches={matches} venues={venues} specialDates={specialDates} client:load />
+	</div>
+</AdminLayout>
+
+<script>
+	const sel = document.getElementById('week-select') as HTMLSelectElement | null;
+	sel?.addEventListener('change', () => {
+		const url = new URL(window.location.href);
+		url.searchParams.set('week', sel.value);
+		window.location.href = url.toString();
+	});
+</script>

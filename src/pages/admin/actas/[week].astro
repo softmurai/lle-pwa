@@ -1,0 +1,106 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { getJornadas, getMatchesByWeek } from '../../../lib/db';
+
+export const prerender = false;
+
+const weekParam = Astro.params.week ?? '';
+const week = Number.parseInt(weekParam, 10);
+if (!Number.isInteger(week)) {
+	return Astro.redirect('/admin/actas');
+}
+
+const jornadas = await getJornadas();
+const jornada = jornadas.find((j) => j.week === week);
+const matches = await getMatchesByWeek(week);
+
+const fmtDate = (iso: string) =>
+	new Date(`${iso}T00:00:00`).toLocaleDateString('es-ES', {
+		weekday: 'short',
+		day: 'numeric',
+		month: 'short',
+	});
+
+const statusLabel: Record<string, { text: string; cls: string }> = {
+	finished: { text: 'Registrado', cls: 'bg-green-100 text-green-700' },
+	forfeit: { text: 'No presentado', cls: 'bg-red-100 text-red-700' },
+	cancelled: { text: 'Cancelado', cls: 'bg-gray-200 text-gray-700' },
+	postponed: { text: 'Aplazado', cls: 'bg-amber-100 text-amber-700' },
+	scheduled: { text: 'Pendiente', cls: 'bg-blue-100 text-blue-700' },
+};
+const statsPendingLabel = { text: 'Pendiente estadísticas', cls: 'bg-amber-100 text-amber-700' };
+---
+
+<AdminLayout title={`Jornada ${week}`}>
+	<div class="flex items-center justify-between gap-3">
+		<div>
+			<p class="text-sm text-gray-500">
+				<a href="/admin/actas" class="hover:underline">← Registrar actas</a>
+			</p>
+			<h1 class="font-display text-3xl tracking-wide text-[#641B24]">Jornada {week}</h1>
+			{jornada && (
+				<p class="mt-1 text-sm text-gray-600">
+					{jornada.first_date === jornada.last_date
+						? fmtDate(jornada.first_date)
+						: `${fmtDate(jornada.first_date)} – ${fmtDate(jornada.last_date)}`}
+					· {jornada.played}/{jornada.total} registrados
+				</p>
+			)}
+		</div>
+	</div>
+
+	<ul class="mt-6 space-y-3">
+		{
+			matches.map((m) => {
+				const badge =
+					m.status === 'finished' && m.stat_count === 0
+						? statsPendingLabel
+						: (statusLabel[m.status] ?? statusLabel.scheduled);
+				const score =
+					m.home_score != null && m.away_score != null
+						? `${m.home_score} - ${m.away_score}`
+						: '';
+				return (
+					<li class="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+						<div class="flex flex-wrap items-center justify-between gap-3">
+							<div class="min-w-0">
+								<div class="flex items-center gap-2">
+									<span class="font-medium text-gray-900">{m.home_team}</span>
+									<span class="text-gray-400">vs</span>
+									<span class="font-medium text-gray-900">{m.away_team}</span>
+								</div>
+								<div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500">
+									<span>{fmtDate(m.date)} · {m.time}</span>
+									{m.venue_name && <span>{m.venue_name}</span>}
+									{m.original_date && (
+										<span class="text-amber-600">
+											Reubicado desde {fmtDate(m.original_date)}
+										</span>
+									)}
+								</div>
+							</div>
+							<div class="flex items-center gap-3">
+								{score && (
+									<span class="font-display text-2xl tracking-wide text-[#641B24]">{score}</span>
+								)}
+								<span class={`rounded-full px-2 py-0.5 text-xs font-medium ${badge.cls}`}>
+									{badge.text}
+								</span>
+								<a
+									href={`/admin/actas/partido/${m.id}`}
+									class="rounded-lg bg-[#641B24] px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-[#7a2130]"
+								>
+									{m.status === 'finished' && m.stat_count === 0
+										? 'Completar estadísticas'
+										: m.status === 'finished' || m.status === 'forfeit'
+											? 'Editar acta'
+											: 'Registrar acta'}
+								</a>
+							</div>
+						</div>
+					</li>
+				);
+			})
+		}
+	</ul>
+</AdminLayout>
