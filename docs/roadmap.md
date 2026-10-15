@@ -265,9 +265,10 @@ On `/partidos/[id]`:
 
 ### 20. Admin panel — auth, actas, jornadas `in progress` — built 2026-10-14, local only
 
-Password-protected area at `/admin` (not linked from the public nav). Deployed: **no**
-— local-only so far; remote migrations not applied. Routes are network-only in the
-service worker (`public/sw.js`, `VERSION` → `lle-v5`).
+Password-protected area at `/admin` (not linked from the public nav). Deployed: **yes**
+(2026-10-15) — remote migrations applied via CI and the `ADMIN_USERS` secret set on the
+`lle-pwa` Worker. Routes are network-only in the service worker (`public/sw.js`,
+`VERSION` → `lle-v5`).
 
 - **Auth (custom, replaces Cloudflare Access for this).** `src/lib/auth.ts` +
   `migrations/0013_admin_auth.sql` (`admin_sessions`, `login_attempts`; user records
@@ -314,8 +315,12 @@ service worker (`public/sw.js`, `VERSION` → `lle-v5`).
   calendar) applied to local D1; `scripts/seed-calendar.sql` seeded 56 matches / 105
   players / 5 venues / 20 special dates (match ids 109–164). `0015_seed_calendar.sql`
   carries the same calendar so CI loads it into the remote DB.
-- **Remaining.** Apply migrations + seed to remote, deploy, rotate the exposed
-  passwords, and do the mobile preview pass. Excel→SQL workflow (#14) still separate.
+- **Remote (2026-10-15).** Migrations `0010`–`0015` applied to remote D1 via CI; the real
+  calendar is live (56 matches / 8 standings rows / 0 stats). `ADMIN_USERS` secret set on
+  the `lle-pwa` Worker and production login verified. `/admin/login` redirects to
+  `/admin` (`src/pages/admin/login.astro`).
+- **Remaining.** Rotate the exposed admin passwords, and do the mobile preview pass.
+  Excel→SQL workflow (#14) still separate.
 
 ---
 
