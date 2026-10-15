@@ -2,7 +2,7 @@ import { defineMiddleware } from 'astro:middleware';
 import { SESSION_COOKIE, verifySession } from './lib/auth';
 
 // Login page and login endpoint are reachable without a session.
-const PUBLIC = new Set(['/admin', '/api/admin/login']);
+const PUBLIC = new Set(['/admin', '/admin/login', '/api/admin/login']);
 
 // Registered as 'referee' (arbis): actas only.
 const REFEREE_BLOCKED_PREFIXES = ['/admin/jornadas'];

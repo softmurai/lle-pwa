@@ -270,7 +270,8 @@ Password-protected area at `/admin` (not linked from the public nav). Deployed: 
 service worker (`public/sw.js`, `VERSION` → `lle-v5`).
 
 - **Auth (custom, replaces Cloudflare Access for this).** `src/lib/auth.ts` +
-  `migrations/0013_admin_auth.sql` (`admin_users`, `admin_sessions`): PBKDF2-SHA256
+  `migrations/0013_admin_auth.sql` (`admin_sessions`, `login_attempts`; user records
+  come from the `ADMIN_USERS` secret, not a DB table): PBKDF2-SHA256
   per-user salt, constant-time compare, 5-failure/15-min lockout, sliding 1 h idle +
   8 h absolute sessions (`lle_admin` cookie, HttpOnly/SameSite=Strict, `Secure` only on
   https). Users from the `ADMIN_USERS` secret (`.dev.vars` locally,
@@ -309,9 +310,10 @@ service worker (`public/sw.js`, `VERSION` → `lle-v5`).
   `getAvailableRainDates`) — **hard blocks** (409): a change that double-books a team
   or a venue/time is rejected; the UI disables confirm while conflicts exist. Rain-date
   suggestions come from `special_dates` (`0014_special_dates.sql`).
-- **Local data.** Migrations `0010` (rewritten FK-safe) and `0011`–`0014` applied to
-  local D1; `scripts/seed-calendar.sql` seeded 56 matches / 105 players / 5 venues /
-  20 special dates (match ids 109–164).
+- **Local data.** Migrations `0010` (rewritten FK-safe) through `0015` (real 2026/27
+  calendar) applied to local D1; `scripts/seed-calendar.sql` seeded 56 matches / 105
+  players / 5 venues / 20 special dates (match ids 109–164). `0015_seed_calendar.sql`
+  carries the same calendar so CI loads it into the remote DB.
 - **Remaining.** Apply migrations + seed to remote, deploy, rotate the exposed
   passwords, and do the mobile preview pass. Excel→SQL workflow (#14) still separate.
 

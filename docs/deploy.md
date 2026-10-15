@@ -52,6 +52,26 @@ npx wrangler d1 migrations apply lle_pwa --remote
 
 En CI se ejecutan automáticamente en cada push a `main`.
 
+### Calendario de temporada
+
+El calendario real 2026/27 (56 partidos, 14 jornadas) se carga con la migración
+`migrations/0015_seed_calendar.sql`, que sustituye los datos mock y deja la
+clasificación a cero. Se aplica a remoto automáticamente vía CI en el push; también
+existe `scripts/seed-calendar.sql` como espejo para uso local/dev.
+
+### Secrets del Worker (admin)
+
+El login de `/admin` lee los usuarios del secret `ADMIN_USERS` (JSON con hashes
+PBKDF2-SHA256). Se genera con `scripts/gen-users.mjs` a partir de
+`ADMIN_CREDENTIALS` y se sube al Worker (no al repo):
+
+```bash
+ADMIN_CREDENTIALS='{"usuario":{"password":"...","role":"admin"}}' node scripts/gen-users.mjs
+npx wrangler secret put ADMIN_USERS --name lle-pwa   # pegar el JSON
+```
+
+En local se define en `.dev.vars` (gitignored). Sin el secret, el login siempre falla.
+
 ### Actualizar datos
 
 El alta de equipos y jugadores (master data) se hace manualmente en D1. Para los
