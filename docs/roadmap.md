@@ -319,8 +319,9 @@ Password-protected area at `/admin` (not linked from the public nav). Deployed: 
   calendar is live (56 matches / 8 standings rows / 0 stats). `ADMIN_USERS` secret set on
   the `lle-pwa` Worker and production login verified. `/admin/login` redirects to
   `/admin` (`src/pages/admin/login.astro`).
-- **Remaining.** Rotate the exposed admin passwords, and do the mobile preview pass.
-  Excel→SQL workflow (#14) still separate.
+- **Mobile pass.** Confirmed OK on the phone (2026-10-15). The exposed admin passwords
+  are intentionally kept for now (decided) — rotation is a future follow-up.
+- **Remaining.** Excel→SQL workflow (#14) is still separate.
 
 ---
 
