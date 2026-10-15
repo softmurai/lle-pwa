@@ -78,8 +78,12 @@ const nameClasses = (outcome: TeamOutcome | null, align: '' | 'text-right') => {
 							<span class="font-medium text-gray-700">
 								Jornada {match.week}
 							</span>
-							<span>·</span>
-							<span>{formatTime(match.time) || formatDate(match.date)}</span>
+							{match.time && (
+								<>
+									<span>·</span>
+									<span>{formatTime(match.time)}</span>
+								</>
+							)}
 							{match.venue_name && (
 								<>
 									<span>·</span>
@@ -129,8 +133,12 @@ const nameClasses = (outcome: TeamOutcome | null, align: '' | 'text-right') => {
 					<span class="font-medium text-gray-700">
 						Jornada {match.week}
 					</span>
-					<span>·</span>
-					<span>{formatTime(match.time) || formatDate(match.date)}</span>
+					{match.time && (
+						<>
+							<span>·</span>
+							<span>{formatTime(match.time)}</span>
+						</>
+					)}
 					{match.venue_name && (
 						<>
 							<span>·</span>

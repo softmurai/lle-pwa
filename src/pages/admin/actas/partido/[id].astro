@@ -48,7 +48,7 @@ const fmtDate = (iso: string) =>
 			{match.home_team} <span class="text-gray-400">vs</span> {match.away_team}
 		</h1>
 		<p class="text-sm text-gray-500">
-			{fmtDate(match.date)} · {match.time}{match.venue_name ? ` · ${match.venue_name}` : ''}
+			{fmtDate(match.date)}{match.time ? ` · ${match.time}` : ''}{match.venue_name ? ` · ${match.venue_name}` : ''}
 		</p>
 	</div>
 

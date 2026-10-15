@@ -172,6 +172,9 @@ On `/partidos/[id]`, chart the score evolution across `Q1..Q4` + OT.
   «Por determinar» until an admin sets the real venue. `VenueLink.astro` renders venues
   without a `maps_url` in italic Bebas Neue, and venues with a link show a small Lucide
   `map` icon after the name to hint it opens Maps.
+- Times wiped for jornadas 2+ (2026-10-15, `migrations/0017_wipe_future_times.sql`) —
+  times not confirmed yet; public UI renders nothing (no placeholder, no date fallback)
+  where a time is missing. Admins set times per match via the schedule board.
 
 ### 20. Admin panel — auth, actas, jornadas `done` — built 2026-10-14, deployed 2026-10-15
 

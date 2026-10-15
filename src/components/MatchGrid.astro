@@ -3,7 +3,7 @@ import ResultBadge from './ResultBadge.astro';
 import ScoreBadge from './ScoreBadge.astro';
 import VenueLink from './VenueLink.astro';
 import type { MatchRow } from '../lib/db';
-import { formatDate, formatTime, teamOutcome } from '../lib/format';
+import { formatTime, teamOutcome } from '../lib/format';
 
 interface Props {
 	matches: MatchRow[];
@@ -22,7 +22,7 @@ const { matches } = Astro.props;
 					aria-label={`${m.home_team} vs ${m.away_team}`}
 				/>
 				<div class="mb-2 text-xs text-gray-500">
-					{formatTime(m.time) || formatDate(m.date)}
+					{formatTime(m.time)}
 				</div>
 				<VenueLink
 					name={m.venue_name}

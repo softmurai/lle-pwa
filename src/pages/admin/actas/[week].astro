@@ -70,7 +70,7 @@ const statsPendingLabel = { text: 'Pendiente estadísticas', cls: 'bg-amber-100 
 									<span class="font-medium text-gray-900">{m.away_team}</span>
 								</div>
 								<div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500">
-									<span>{fmtDate(m.date)} · {m.time}</span>
+									<span>{fmtDate(m.date)}{m.time ? ` · ${m.time}` : ''}</span>
 									{m.venue_name && <span>{m.venue_name}</span>}
 									{m.original_date && (
 										<span class="text-amber-600">
