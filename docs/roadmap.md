@@ -167,6 +167,11 @@ On `/partidos/[id]`, chart the score evolution across `Q1..Q4` + OT.
   (Inicio + Calendario) pin the venue to the top-right corner as a Maps link; the card is
   a wrapper `<div>` with a transparent overlay link to the match (so the venue link and
   the match link are not nested).
+- TBD venue (2026-10-15): `migrations/0016_tbd_venue.sql` adds a `Por determinar` venue
+  (no `maps_url`) and points all `scheduled` matches at it — future games default to
+  «Por determinar» until an admin sets the real venue. `VenueLink.astro` renders venues
+  without a `maps_url` in italic Bebas Neue, and venues with a link show a small Lucide
+  `map` icon after the name to hint it opens Maps.
 
 ### 20. Admin panel — auth, actas, jornadas `done` — built 2026-10-14, deployed 2026-10-15
 
