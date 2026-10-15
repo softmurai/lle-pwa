@@ -4,9 +4,10 @@ import ThTooltip from '../../components/ThTooltip.astro';
 import TeamBadge from '../../components/TeamBadge.astro';
 import ScoreBadge from '../../components/ScoreBadge.astro';
 import VenueLink from '../../components/VenueLink.astro';
+import MovedBadge from '../../components/MovedBadge.astro';
 import type { BoxScoreRow } from '../../lib/db';
 import { getMatch, getMatchBoxScore } from '../../lib/db';
-import { formatDate, formatTime, teamOutcome, type TeamOutcome } from '../../lib/format';
+import { formatDate, formatTime, movedLabel, teamOutcome, type TeamOutcome } from '../../lib/format';
 
 const rawId = Number(Astro.params.id);
 const match = Number.isNaN(rawId) ? null : await getMatch(rawId);
@@ -37,12 +38,7 @@ const boxColumns = [
 
 const homeOutcome = match ? teamOutcome(match, 'home') : null;
 const awayOutcome = match ? teamOutcome(match, 'away') : null;
-const movedLabel =
-	match?.original_date && match.original_date !== match.date
-		? match.date < match.original_date
-			? 'Adelantado'
-			: 'Aplazado'
-		: null;
+const moved = match ? movedLabel(match.original_date, match.date) : null;
 const nameClasses = (outcome: TeamOutcome | null, align: '' | 'text-right') => {
 	const base = `truncate font-display uppercase tracking-wide ${align}`;
 	if (!outcome) return `${base} text-lg`;
@@ -78,6 +74,8 @@ const nameClasses = (outcome: TeamOutcome | null, align: '' | 'text-right') => {
 							<span class="font-medium text-gray-700">
 								Jornada {match.week}
 							</span>
+							<span>·</span>
+							<span>{formatDate(match.date)}</span>
 							{match.time && (
 								<>
 									<span>·</span>
@@ -133,6 +131,8 @@ const nameClasses = (outcome: TeamOutcome | null, align: '' | 'text-right') => {
 					<span class="font-medium text-gray-700">
 						Jornada {match.week}
 					</span>
+					<span>·</span>
+					<span>{formatDate(match.date)}</span>
 					{match.time && (
 						<>
 							<span>·</span>
@@ -197,13 +197,10 @@ const nameClasses = (outcome: TeamOutcome | null, align: '' | 'text-right') => {
 				</div>
 
 				{
-					match && (movedLabel || match.observations || match.acta_photo_key) && (
+					match && (moved || match.observations || match.acta_photo_key) && (
 						<div class="mt-4 space-y-3">
-							{movedLabel && match.original_date && (
-								<p class="inline-flex items-center gap-1.5 rounded-lg bg-amber-100 px-3 py-1.5 text-sm text-amber-800">
-									<span class="font-semibold">{movedLabel}</span>
-									<span>desde {formatDate(match.original_date)}</span>
-								</p>
+							{moved && match.original_date && (
+								<MovedBadge originalDate={match.original_date} date={match.date} />
 							)}
 							{match.observations && (
 								<div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">

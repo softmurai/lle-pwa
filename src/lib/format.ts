@@ -36,6 +36,16 @@ export function formatTime(time: string | null | undefined): string {
 	return `${hour}:${m ?? '00'}h`;
 }
 
+export type MovedLabel = 'Aplazado' | 'Adelantado';
+
+export function movedLabel(
+	originalDate: string | null | undefined,
+	date: string,
+): MovedLabel | null {
+	if (!originalDate || originalDate === date) return null;
+	return date < originalDate ? 'Adelantado' : 'Aplazado';
+}
+
 export type TeamOutcome = 'win' | 'loss' | 'forfeit';
 
 export interface TeamOutcomeInput {

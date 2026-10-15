@@ -99,6 +99,7 @@ export interface MatchRow {
 	home_score: number | null;
 	away_score: number | null;
 	status: string;
+	original_date: string | null;
 	home_id: number;
 	away_id: number;
 	forfeit_team_id: number | null;
@@ -115,6 +116,7 @@ async function matchesQuery(where = '', orderBy = '', bind: unknown[] = []): Pro
 	const res = await env.lle_pwa
 		.prepare(
 			`SELECT m.id, m.week, m.date, m.time, m.home_score, m.away_score, m.status,
+			        m.original_date,
 			        m.home_team_id AS home_id, m.away_team_id AS away_id, m.forfeit_team_id,
 			        ht.name AS home_team, ht.short_name AS home_short,
 			        at.name AS away_team, at.short_name AS away_short,

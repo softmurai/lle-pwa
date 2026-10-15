@@ -2,8 +2,9 @@
 import ResultBadge from './ResultBadge.astro';
 import ScoreBadge from './ScoreBadge.astro';
 import VenueLink from './VenueLink.astro';
+import MovedBadge from './MovedBadge.astro';
 import type { MatchRow } from '../lib/db';
-import { formatTime, teamOutcome } from '../lib/format';
+import { formatTime, movedLabel, teamOutcome } from '../lib/format';
 
 interface Props {
 	matches: MatchRow[];
@@ -21,8 +22,11 @@ const { matches } = Astro.props;
 					class="absolute inset-0 rounded-xl"
 					aria-label={`${m.home_team} vs ${m.away_team}`}
 				/>
-				<div class="mb-2 text-xs text-gray-500">
-					{formatTime(m.time)}
+				<div class="mb-2 flex flex-wrap items-center gap-2 text-xs text-gray-500">
+					{formatTime(m.time) && <span>{formatTime(m.time)}</span>}
+					{movedLabel(m.original_date, m.date) && (
+						<MovedBadge originalDate={m.original_date} date={m.date} size="sm" />
+					)}
 				</div>
 				<VenueLink
 					name={m.venue_name}

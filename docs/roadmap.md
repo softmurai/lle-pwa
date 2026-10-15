@@ -74,7 +74,10 @@ On `/partidos/[id]`:
 - **"Observaciones / Notas"** — `done` (2026-10-14). `matches.observations`, rendered
   on the match page. See #20.
 - **"Aplazado/Adelantado desde …" badge** — `done` (2026-10-14). Derived from
-  `matches.original_date` vs `matches.date`. See #20.
+  `matches.original_date` vs `matches.date`. See #20. Reworked (2026-10-15) to
+  `Aplazado <fecha original> → <fecha nueva>` via the shared `MovedBadge.astro` /
+  `movedLabel()` and also shown on Calendario/Inicio match cards (#22). The match
+  header now shows the match date between "Jornada N" and the hour.
 - **Quarter-by-quarter graph** — promoted to its own item (#11).
 
 ### 9. Hover tooltips on acronym table headers `done`
@@ -271,6 +274,20 @@ the week helpers (`getLatestWeek`, `getLastPlayedWeek`, `getUpcomingWeek`,
 
 - Standings stored per season vs. computed from matches.
 - Whether the Estadísticas leaderboards (#1) are per-season too.
+
+### 22. Postponed matches in the calendar — "Jornada aplazada" `done` — 2026-10-15
+
+On `/calendario`, matches moved to a **rain/reserved `special_dates` date**
+(`type='lluvia'`, `detail='LLUVIA/APLAZADO'`) are pulled out of their normal
+`Jornada N` section into a **"Jornada aplazada"** section, one per distinct date,
+placed chronologically between the surrounding jornadas (e.g. a game moved to
+2026-12-19 sits between Jornada 7 and Jornada 8). Non-special-date moves stay in
+their `Jornada N` (with the badge); jornada headers show a date range when they
+span more than one date.
+
+- `MatchRow` now carries `original_date` (`src/lib/db.ts`, `matchesQuery`).
+- Shared badge/label: `src/components/MovedBadge.astro` + `movedLabel()`
+  (`src/lib/format.ts`), reused by the match page and `MatchGrid.astro` cards.
 
 ---
 

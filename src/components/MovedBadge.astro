@@ -1,0 +1,28 @@
+---
+import { formatDate, movedLabel } from '../lib/format';
+
+interface Props {
+	originalDate: string | null | undefined;
+	date: string;
+	size?: 'sm' | 'md';
+	class?: string;
+}
+
+const { originalDate, date, size = 'md', class: className = '' } = Astro.props;
+const label = movedLabel(originalDate, date);
+const sizeClasses =
+	size === 'sm' ? 'gap-1 px-1.5 py-0.5 text-[10px]' : 'gap-1.5 px-3 py-1.5 text-sm';
+---
+
+{
+	label && originalDate && (
+		<span
+			class={`inline-flex items-center rounded-lg bg-amber-100 font-medium text-amber-800 ${sizeClasses} ${className}`}
+		>
+			<span class="font-semibold">{label}</span>
+			<span>{formatDate(originalDate)}</span>
+			<span aria-hidden="true">→</span>
+			<span>{formatDate(date)}</span>
+		</span>
+	)
+}
