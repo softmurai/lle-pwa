@@ -74,9 +74,9 @@ En local se define en `.dev.vars` (gitignored). Sin el secret, el login siempre 
 
 ### Actualizar datos
 
-El alta de equipos y jugadores (master data) se hace manualmente en D1. Para los
-resultados, el flujo Excel→SQL (roadmap #14/#15) genera el SQL y se aplica desde la
-consola de D1 de Cloudflare. Alternativa por CLI:
+El alta de equipos y jugadores (master data) se hace manualmente en D1. Los resultados y
+estadísticas se introducen desde el panel de administración (`/admin`, roadmap #20), no
+por SQL pegado. Para cambios puntuales sigue existiendo la CLI:
 
 ```bash
 npx wrangler d1 execute lle-pwa --remote --file=seed.sql
