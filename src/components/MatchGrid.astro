@@ -22,7 +22,12 @@ const { matches } = Astro.props;
 					class="absolute inset-0 rounded-xl"
 					aria-label={`${m.home_team} vs ${m.away_team}`}
 				/>
-				<div class="mb-2 flex flex-wrap items-center gap-2 text-xs text-gray-500">
+				<div
+					class:list={[
+						'mb-2 flex flex-wrap items-center gap-2 text-xs text-gray-500',
+						m.venue_name && 'min-h-4',
+					]}
+				>
 					{formatTime(m.time) && <span>{formatTime(m.time)}</span>}
 					{movedLabel(m.original_date, m.date) && (
 						<MovedBadge originalDate={m.original_date} date={m.date} size="sm" />
