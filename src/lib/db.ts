@@ -244,7 +244,7 @@ export async function getRoster(teamId: number): Promise<PlayerStatRow[]> {
 			 LEFT JOIN match_stats ms ON ms.player_id = p.id
 			 WHERE p.team_id = ?
 			 GROUP BY p.id, p.name, p.number
-			 ORDER BY points DESC, p.name COLLATE NOCASE`,
+			 ORDER BY (number IS NULL OR number = ''), CAST(number AS INTEGER), number, p.name COLLATE NOCASE`,
 		)
 		.bind(teamId)
 		.all();
@@ -352,7 +352,7 @@ export async function getMatchBoxScore(matchId: number): Promise<BoxScoreRow[]> 
 			 JOIN players p ON p.id = ms.player_id
 			 JOIN teams t ON t.id = p.team_id
 			 WHERE ms.match_id = ?
-			 ORDER BY t.id, ms.points DESC, p.name COLLATE NOCASE`,
+			 ORDER BY t.id, (p.number IS NULL OR p.number = ''), CAST(p.number AS INTEGER), p.number, p.name COLLATE NOCASE`,
 		)
 		.bind(matchId)
 		.all();

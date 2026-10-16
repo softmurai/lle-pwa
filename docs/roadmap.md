@@ -64,6 +64,14 @@ progresses.
 - New DB helper (e.g. `getTeamMatches(teamId)` reusing `matchesQuery`) that splits
   finished vs. scheduled; reuse `teamOutcome` for badges.
 
+### 7b. Player tables default order → dorsal `done` — 2026-10-16
+
+- `getRoster()` (team page `equipos/[id]`) and `getMatchBoxScore()` (match page
+  `partidos/[id]`) now list players by dorsal — `CAST(number AS INTEGER)`, players
+  without number last, name as tiebreaker — instead of `points DESC`. Header-click
+  sorting on the roster table still overrides the default. Admin actas already used
+  dorsal order (`getTeamPlayers()`); Jugadores stays alphabetical (cross-team list).
+
 ### 8. Match detail enhancements — acta, quarter graph, notes `in progress`
 
 On `/partidos/[id]`:
