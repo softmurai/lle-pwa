@@ -93,6 +93,11 @@ On `/partidos/[id]`:
   `movedLabel()` and also shown on Calendario/Inicio match cards (#22). The match
   header now shows the match date between "Jornada N" and the hour.
 - **Quarter-by-quarter graph** — promoted to its own item (#11); shipped 2026-10-16.
+- **Header layout** — reworked (2026-10-16). "Jornada N" is split out of the
+  `date · hour · venue` line into its own Bebas Neue title (`font-display text-3xl`,
+  brand red `#641B24`) on its own row above the venue line. Team logos enlarged from
+  `sm`/`lg` to `xl` (80px) **in place** — mobile keeps the `logo VS logo` pair on the
+  right of the header; the desktop score card keeps its two logos. No logos relocated.
 
 ### 9. Hover tooltips on acronym table headers `done`
 

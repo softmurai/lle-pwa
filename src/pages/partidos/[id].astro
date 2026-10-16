@@ -91,21 +91,18 @@ const nameClasses = (outcome: TeamOutcome | null, align: '' | 'text-right') => {
 						>
 							← Calendario
 						</a>
+						<h1 class="mt-1 font-display text-3xl tracking-wide text-[#101828]">
+							Jornada {match.week}
+						</h1>
 						<div class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
-							<span class="font-medium text-gray-700">
-								Jornada {match.week}
-							</span>
-							<span>·</span>
-							<span>{formatDate(match.date)}</span>
 							{match.time && (
 								<>
-									<span>·</span>
 									<span>{formatTime(match.time)}</span>
 								</>
 							)}
+							<span class="mr-1">{formatDate(match.date)}</span>
 							{match.venue_name && (
 								<>
-									<span>·</span>
 									<VenueLink
 										name={match.venue_name}
 										short={match.venue_short}
@@ -120,17 +117,19 @@ const nameClasses = (outcome: TeamOutcome | null, align: '' | 'text-right') => {
 						<a href={`/equipos/${match.home_id}`} class="shrink-0">
 							<TeamBadge
 								bare
+								size="xl"
 								logoUrl={match.home_logo}
 								name={match.home_team}
 								shortName={match.home_short}
 							/>
 						</a>
-						<span class="font-display text-2xl tracking-widest text-black">
+						<span class="font-display text-2xl text-black">
 							VS
 						</span>
 						<a href={`/equipos/${match.away_id}`} class="shrink-0">
 							<TeamBadge
 								bare
+								size="xl"
 								logoUrl={match.away_logo}
 								name={match.away_team}
 								shortName={match.away_short}
@@ -148,21 +147,18 @@ const nameClasses = (outcome: TeamOutcome | null, align: '' | 'text-right') => {
 					</a>
 				</p>
 
-				<div class="mt-3 hidden flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500 sm:flex">
-					<span class="font-medium text-gray-700">
-						Jornada {match.week}
-					</span>
-					<span>·</span>
-					<span>{formatDate(match.date)}</span>
+				<h1 class="mt-3 hidden font-display text-3xl tracking-wide text-[#641B24] sm:block">
+					Jornada {match.week}
+				</h1>
+				<div class="mt-1 hidden flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500 sm:flex">
 					{match.time && (
 						<>
-							<span>·</span>
 							<span>{formatTime(match.time)}</span>
 						</>
 					)}
+					<span class="mr-2">{formatDate(match.date)}</span>
 					{match.venue_name && (
 						<>
-							<span>·</span>
 							<VenueLink
 								name={match.venue_name}
 								short={match.venue_short}
@@ -187,7 +183,7 @@ const nameClasses = (outcome: TeamOutcome | null, align: '' | 'text-right') => {
 						<a href={`/equipos/${match.home_id}`} class="hidden sm:inline-flex">
 							<TeamBadge
 								bare
-								size="lg"
+								size="xl"
 								logoUrl={match.home_logo}
 								name={match.home_team}
 								shortName={match.home_short}
@@ -199,7 +195,7 @@ const nameClasses = (outcome: TeamOutcome | null, align: '' | 'text-right') => {
 						<a href={`/equipos/${match.away_id}`} class="hidden sm:inline-flex">
 							<TeamBadge
 								bare
-								size="lg"
+								size="xl"
 								logoUrl={match.away_logo}
 								name={match.away_team}
 								shortName={match.away_short}
