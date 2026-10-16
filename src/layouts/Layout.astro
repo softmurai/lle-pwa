@@ -19,7 +19,7 @@ const cardUrl = new URL('/icon-512.png', Astro.url.origin);
 	<head>
 		<meta charset="utf-8" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 		<meta name="generator" content={Astro.generator} />
 		<meta name="theme-color" content="#641B24" />
 		<link rel="manifest" href="/manifest.webmanifest" />
@@ -47,11 +47,11 @@ const cardUrl = new URL('/icon-512.png', Astro.url.origin);
 			</svg>
 		</div>
 		<Nav />
-		<main class="flex-1 pb-20 md:pb-0">
+		<main class="flex-1">
 			<slot />
 		</main>
 		<footer
-			class="border-t border-gray-200 bg-white py-5 text-center text-xs text-gray-400"
+			class="border-t border-gray-200 bg-white py-5 pb-[calc(env(safe-area-inset-bottom)+76px)] text-center text-xs text-gray-400 md:pb-5"
 		>
 			Liga Elche Baloncesto · Datos importados semanalmente
 		</footer>
