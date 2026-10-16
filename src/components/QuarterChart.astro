@@ -56,7 +56,7 @@ for (let v = 0; v <= axisMax; v += STEP) gridLines.push(v);
 // Geometry, in SVG viewBox units.
 const PAD_LEFT = 30;
 const PAD_RIGHT = 18;
-const PAD_TOP = 20;
+const PAD_TOP = 30;
 const PLOT_H = 140;
 const PAD_BOTTOM = 28;
 
@@ -94,11 +94,30 @@ const marks = slots.map((_, i) => {
 const summary = `Evolución acumulada por cuartos. ${homeName}: ${homeCum.join(', ')}. ${awayName}: ${awayCum.join(', ')}.`;
 ---
 
+<style>
+	@media (max-width: 640px) {
+		.quarter-chart-svg text {
+			font-size: 12px;
+		}
+		.quarter-chart-svg polyline {
+			stroke-width: 3;
+		}
+		.quarter-chart-svg circle {
+			r: 3.5px;
+		}
+	}
+</style>
+
 <section class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
 	<h2
 		class="flex items-center justify-between gap-3 border-b border-gray-200 bg-gray-50 px-4 py-3 font-semibold"
 	>
-		<span>Evolución por cuartos</span>
+		<span
+			id="qchart-title"
+			data-full="Evolución por cuartos"
+			data-short="Evolución"
+			>Evolución por cuartos</span
+		>
 		<span class="flex items-center gap-3 text-xs font-normal text-gray-500">
 			<span class="inline-flex items-center gap-1.5">
 				<svg width="22" height="10" viewBox="0 0 22 10" aria-hidden="true" class="shrink-0">
@@ -136,7 +155,7 @@ const summary = `Evolución acumulada por cuartos. ${homeName}: ${homeCum.join('
 	<div class="px-4 py-4">
 		<svg
 			viewBox={`0 0 ${width} ${height}`}
-			class="mx-auto h-auto w-full max-w-[640px]"
+			class="quarter-chart-svg mx-auto h-auto w-full max-w-[640px]"
 			role="img"
 			aria-label={summary}
 			preserveAspectRatio="xMidYMid meet"
@@ -164,6 +183,17 @@ const summary = `Evolución acumulada por cuartos. ${homeName}: ${homeCum.join('
 					</g>
 				))
 			}
+
+			<text
+				x={PAD_LEFT - 7}
+				y={PAD_TOP - 14}
+				text-anchor="end"
+				font-size="10"
+				font-weight="600"
+				fill="#9ca3af"
+			>
+				PTS
+			</text>
 
 			{
 				slots.map((s) => (
@@ -249,3 +279,24 @@ const summary = `Evolución acumulada por cuartos. ${homeName}: ${homeCum.join('
 		</svg>
 	</div>
 </section>
+
+<script>
+	const title = document.getElementById('qchart-title');
+	if (title) {
+		const FULL = title.dataset.full ?? 'Evolución por cuartos';
+		const SHORT = title.dataset.short ?? 'Evolución';
+
+		const update = () => {
+			title.textContent = FULL;
+			const lineHeight = parseFloat(getComputedStyle(title).lineHeight) || 1;
+			const wrapped = title.getBoundingClientRect().height > lineHeight * 1.35;
+			title.textContent = wrapped ? SHORT : FULL;
+		};
+
+		update();
+		window.addEventListener('resize', update);
+		if (document.fonts && document.fonts.ready) {
+			document.fonts.ready.then(update);
+		}
+	}
+</script>
