@@ -303,6 +303,20 @@ export interface MatchDetail {
 	away_short: string;
 	away_logo: string | null;
 	forfeit_team_id: number | null;
+	home_q1: number | null;
+	home_q2: number | null;
+	home_q3: number | null;
+	home_q4: number | null;
+	away_q1: number | null;
+	away_q2: number | null;
+	away_q3: number | null;
+	away_q4: number | null;
+	home_ot1: number | null;
+	home_ot2: number | null;
+	home_ot3: number | null;
+	away_ot1: number | null;
+	away_ot2: number | null;
+	away_ot3: number | null;
 	observations: string | null;
 	acta_photo_key: string | null;
 	original_date: string | null;
@@ -319,7 +333,12 @@ export async function getMatch(id: number): Promise<MatchDetail | null> {
 			        ht.logo_url AS home_logo,
 			        at.id AS away_id, at.name AS away_team, at.short_name AS away_short,
 			        at.logo_url AS away_logo,
-			        m.forfeit_team_id, m.observations, m.acta_photo_key, m.original_date,
+			        m.forfeit_team_id,
+			        m.home_q1, m.home_q2, m.home_q3, m.home_q4,
+			        m.away_q1, m.away_q2, m.away_q3, m.away_q4,
+			        m.home_ot1, m.home_ot2, m.home_ot3,
+			        m.away_ot1, m.away_ot2, m.away_ot3,
+			        m.observations, m.acta_photo_key, m.original_date,
 			        v.name AS venue_name, v.short_name AS venue_short, v.maps_url AS venue_maps
 			 FROM matches m
 			 JOIN teams ht ON ht.id = m.home_team_id

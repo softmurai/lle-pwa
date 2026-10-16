@@ -1,0 +1,202 @@
+---
+interface Props {
+	/** Q1..Q4 followed by OT1..OT3 (7 slots, null when unplayed). */
+	home: (number | null)[];
+	away: (number | null)[];
+	homeName: string;
+	awayName: string;
+}
+
+const { home, away, homeName, awayName } = Astro.props;
+
+const QUARTER_COUNT = 4;
+const OT_LABELS = ['PR1', 'PR2', 'PR3'];
+
+// Include overtime periods up to the last one that either team scored in.
+let otCount = 0;
+for (let i = 0; i < OT_LABELS.length; i++) {
+	if (home[QUARTER_COUNT + i] != null || away[QUARTER_COUNT + i] != null) otCount = i + 1;
+}
+
+// A quarter takes a full slot; overtime takes half, since it is half the time played.
+type Period = { label: string; slot: number; home: number | null; away: number | null };
+const periods: Period[] = [];
+for (let i = 0; i < QUARTER_COUNT; i++) {
+	periods.push({ label: `Q${i + 1}`, slot: 2, home: home[i] ?? null, away: away[i] ?? null });
+}
+for (let i = 0; i < otCount; i++) {
+	periods.push({
+		label: OT_LABELS[i],
+		slot: 1,
+		home: home[QUARTER_COUNT + i] ?? null,
+		away: away[QUARTER_COUNT + i] ?? null,
+	});
+}
+
+const values = periods.flatMap((p) => [p.home, p.away]).filter((v): v is number => v != null);
+const axisMax = Math.max(1, ...values);
+
+// Geometry, in SVG viewBox units.
+const UNIT = 54; // width of one quarter slot
+const PAD_LEFT = 30;
+const PAD_RIGHT = 14;
+const PAD_TOP = 22;
+const PLOT_H = 128;
+const PAD_BOTTOM = 44;
+
+const plotW = periods.reduce((acc, p) => acc + p.slot, 0) * UNIT;
+const width = PAD_LEFT + plotW + PAD_RIGHT;
+const height = PAD_TOP + PLOT_H + PAD_BOTTOM;
+
+const yToPx = (v: number) => PAD_TOP + PLOT_H - (v / axisMax) * PLOT_H;
+
+let cursor = PAD_LEFT;
+const points = periods.map((p) => {
+	const cx = cursor + (p.slot * UNIT) / 2;
+	cursor += p.slot * UNIT;
+	return { ...p, cx };
+});
+
+const HOME_COLOR = '#641B24';
+const AWAY_COLOR = '#2563eb';
+
+const polyline = (key: 'home' | 'away') =>
+	points
+		.filter((p) => p[key] != null)
+		.map((p) => `${p.cx},${yToPx(p[key] as number)}`)
+		.join(' ');
+
+const dots = (key: 'home' | 'away') =>
+	points
+		.filter((p) => p[key] != null)
+		.map((p) => ({ cx: p.cx, cy: yToPx(p[key] as number), value: p[key] as number }));
+
+const homeDots = dots('home');
+const awayDots = dots('away');
+
+const tickLabel = (v: number) => String(v);
+const mid = Math.round(axisMax / 2);
+const yTicks = mid > 0 && mid < axisMax ? [0, mid, axisMax] : [0, axisMax];
+
+const summary = `Evolución por cuartos. ${homeName}: ${periods
+	.map((p) => p.home ?? '-')
+	.join(', ')} puntos. ${awayName}: ${periods
+	.map((p) => p.away ?? '-')
+	.join(', ')} puntos.`;
+---
+
+<section class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+	<h2 class="border-b border-gray-200 bg-gray-50 px-4 py-3 font-semibold">
+		Evolución por cuartos
+	</h2>
+	<div class="px-4 py-4">
+		<div class="mb-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-600">
+			<span class="inline-flex items-center gap-1.5">
+				<span class="h-2.5 w-2.5 rounded-full" style={`background:${HOME_COLOR}`}></span>
+				{homeName}
+			</span>
+			<span class="inline-flex items-center gap-1.5">
+				<span class="h-2.5 w-2.5 rounded-full" style={`background:${AWAY_COLOR}`}></span>
+				{awayName}
+			</span>
+		</div>
+
+		<svg
+			viewBox={`0 0 ${width} ${height}`}
+			class="h-auto w-full"
+			role="img"
+			aria-label={summary}
+			preserveAspectRatio="xMidYMid meet"
+		>
+			{
+				yTicks.map((t) => (
+					<g>
+						<line
+							x1={PAD_LEFT}
+							y1={yToPx(t)}
+							x2={PAD_LEFT + plotW}
+							y2={yToPx(t)}
+							stroke="#e5e7eb"
+							stroke-width="1"
+						/>
+						<text
+							x={PAD_LEFT - 6}
+							y={yToPx(t) + 3.5}
+							text-anchor="end"
+							font-size="10"
+							fill="#9ca3af"
+						>
+							{tickLabel(t)}
+						</text>
+					</g>
+				))
+			}
+
+			{
+				points.map((p) => (
+					<text
+						x={p.cx}
+						y={PAD_TOP + PLOT_H + 34}
+						text-anchor="middle"
+						font-size="11"
+						fill="#6b7280"
+					>
+						{p.label}
+					</text>
+				))
+			}
+
+			<polyline
+				points={polyline('home')}
+				fill="none"
+				stroke={HOME_COLOR}
+				stroke-width="2"
+				stroke-linejoin="round"
+				stroke-linecap="round"
+			/>
+			<polyline
+				points={polyline('away')}
+				fill="none"
+				stroke={AWAY_COLOR}
+				stroke-width="2"
+				stroke-linejoin="round"
+				stroke-linecap="round"
+			/>
+
+			{
+				homeDots.map((d) => (
+					<g>
+						<circle cx={d.cx} cy={d.cy} r="4" fill="#fff" stroke={HOME_COLOR} stroke-width="2.5" />
+						<text
+							x={d.cx}
+							y={d.cy - 9}
+							text-anchor="middle"
+							font-size="10"
+							font-weight="600"
+							fill={HOME_COLOR}
+						>
+							{d.value}
+						</text>
+					</g>
+				))
+			}
+			{
+				awayDots.map((d) => (
+					<g>
+						<circle cx={d.cx} cy={d.cy} r="4" fill="#fff" stroke={AWAY_COLOR} stroke-width="2.5" />
+						<text
+							x={d.cx}
+							y={d.cy + 16}
+							text-anchor="middle"
+							font-size="10"
+							font-weight="600"
+							fill={AWAY_COLOR}
+						>
+							{d.value}
+						</text>
+					</g>
+				))
+			}
+		</svg>
+	</div>
+</section>

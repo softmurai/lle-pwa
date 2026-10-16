@@ -5,6 +5,7 @@ import TeamBadge from '../../components/TeamBadge.astro';
 import ScoreBadge from '../../components/ScoreBadge.astro';
 import VenueLink from '../../components/VenueLink.astro';
 import MovedBadge from '../../components/MovedBadge.astro';
+import QuarterChart from '../../components/QuarterChart.astro';
 import type { BoxScoreRow } from '../../lib/db';
 import { getMatch, getMatchBoxScore } from '../../lib/db';
 import { formatDate, formatTime, movedLabel, teamOutcome, type TeamOutcome } from '../../lib/format';
@@ -16,6 +17,26 @@ if (!match) Astro.response.status = 404;
 
 const homeRows = rows.filter((r) => r.team_id === match?.home_id);
 const awayRows = rows.filter((r) => r.team_id === match?.away_id);
+
+const homePeriods = [
+	match?.home_q1 ?? null,
+	match?.home_q2 ?? null,
+	match?.home_q3 ?? null,
+	match?.home_q4 ?? null,
+	match?.home_ot1 ?? null,
+	match?.home_ot2 ?? null,
+	match?.home_ot3 ?? null,
+];
+const awayPeriods = [
+	match?.away_q1 ?? null,
+	match?.away_q2 ?? null,
+	match?.away_q3 ?? null,
+	match?.away_q4 ?? null,
+	match?.away_ot1 ?? null,
+	match?.away_ot2 ?? null,
+	match?.away_ot3 ?? null,
+];
+const hasQuarterScores = [...homePeriods, ...awayPeriods].some((v) => v != null);
 
 const totals = (list: BoxScoreRow[]) =>
 	list.reduce(
@@ -197,36 +218,6 @@ const nameClasses = (outcome: TeamOutcome | null, align: '' | 'text-right') => {
 				</div>
 
 				{
-					match && (moved || match.observations || match.acta_photo_key) && (
-						<div class="mt-4 space-y-3">
-							{moved && match.original_date && (
-								<MovedBadge originalDate={match.original_date} date={match.date} />
-							)}
-							{match.observations && (
-								<div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-									<h2 class="text-xs font-semibold tracking-wide text-gray-500 uppercase">
-										Observaciones
-									</h2>
-									<p class="mt-1 text-sm whitespace-pre-line text-gray-700">
-										{match.observations}
-									</p>
-								</div>
-							)}
-							{match.acta_photo_key && (
-								<a
-									href={`/${match.acta_photo_key}`}
-									target="_blank"
-									rel="noreferrer"
-									class="inline-flex items-center gap-1 text-sm font-medium text-[#79131f] hover:underline"
-								>
-									Ver acta del partido →
-								</a>
-							)}
-						</div>
-					)
-				}
-
-				{
 					rows.length === 0 ? (
 						<div
 							class="mt-6 rounded-xl border border-dashed border-gray-300 bg-white p-8 text-center text-gray-500"
@@ -332,6 +323,70 @@ const nameClasses = (outcome: TeamOutcome | null, align: '' | 'text-right') => {
 									</section>
 								);
 							})}
+						</div>
+					)
+				}
+
+				{
+					hasQuarterScores && (
+						<div class="mt-6">
+							<QuarterChart
+								home={homePeriods}
+								away={awayPeriods}
+								homeName={match.home_team}
+								awayName={match.away_team}
+							/>
+						</div>
+					)
+				}
+
+				{
+					(moved || match.observations || match.acta_photo_key) && (
+						<div class="mt-4 space-y-3">
+							{moved && match.original_date && (
+								<MovedBadge originalDate={match.original_date} date={match.date} />
+							)}
+							{match.observations && (
+								<div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+									<h2 class="text-xs font-semibold tracking-wide text-gray-500 uppercase">
+										Observaciones
+									</h2>
+									<p class="mt-1 text-sm whitespace-pre-line text-gray-700">
+										{match.observations}
+									</p>
+								</div>
+							)}
+							{match.acta_photo_key && (
+								<a
+									href={`/${match.acta_photo_key}`}
+									target="_blank"
+									rel="noreferrer"
+									class="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold tracking-wide text-[#79131f] uppercase shadow-sm transition hover:bg-gray-50"
+								>
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										width="15"
+										height="15"
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke="currentColor"
+										stroke-width="2"
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										aria-hidden="true"
+									>
+										<rect width="8" height="4" x="8" y="2" rx="1" ry="1"></rect>
+										<path
+											d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"
+										></path>
+										<path d="M12 11h4"></path>
+										<path d="M12 16h4"></path>
+										<path d="M8 11h.01"></path>
+										<path d="M8 16h.01"></path>
+									</svg>
+									Ver acta
+								</a>
+							)}
 						</div>
 					)
 				}

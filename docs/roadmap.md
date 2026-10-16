@@ -72,21 +72,22 @@ progresses.
   sorting on the roster table still overrides the default. Admin actas already used
   dorsal order (`getTeamPlayers()`); Jugadores stays alphabetical (cross-team list).
 
-### 8. Match detail enhancements — acta, quarter graph, notes `in progress`
+### 8. Match detail enhancements — acta, quarter graph, notes `done` — 2026-10-16
 
 On `/partidos/[id]`:
 
 - **"Ver acta" button** — `done` (2026-10-14). Uploaded acta photo stored in R2
   (`acta_photo_key`); served same-origin via `src/pages/actas/[file].ts`; linked from
-  the match page. See #20.
+  the match page. See #20. Restyled (2026-10-16) from a text link to a small
+  **«VER ACTA»** button with a lucide `clipboard-list` icon (see #11).
 - **"Observaciones / Notas"** — `done` (2026-10-14). `matches.observations`, rendered
-  on the match page. See #20.
+  on the match page. See #20. Moved (2026-10-16) below the player stats + quarter chart.
 - **"Aplazado/Adelantado desde …" badge** — `done` (2026-10-14). Derived from
   `matches.original_date` vs `matches.date`. See #20. Reworked (2026-10-15) to
   `Aplazado <fecha original> → <fecha nueva>` via the shared `MovedBadge.astro` /
   `movedLabel()` and also shown on Calendario/Inicio match cards (#22). The match
   header now shows the match date between "Jornada N" and the hour.
-- **Quarter-by-quarter graph** — promoted to its own item (#11).
+- **Quarter-by-quarter graph** — promoted to its own item (#11); shipped 2026-10-16.
 
 ### 9. Hover tooltips on acronym table headers `done`
 
@@ -105,17 +106,25 @@ On `/partidos/[id]`:
     (PJ), Equipos/`[id]` roster (PJ/Pts·PJ/2P/3P/TL%), Partido/`[id]` box score
     (P/2P/3P/TL/TLI/Fal).
 
-### 11. Quarter-by-quarter score graph `planned`
+### 11. Quarter-by-quarter score graph `done` — 2026-10-16
 
-On `/partidos/[id]`, chart the score evolution across `Q1..Q4` + OT.
+On `/partidos/[id]`, charts the per-quarter score evolution across `Q1..Q4` + OT.
 
-- **Data is already live.** Per-quarter/OT columns (`home_q1..q4`, `away_q1..q4`,
-  `home_ot1..ot3`, `away_ot1..ot3`) were added in `migrations/0012_extend_matches.sql` and
-  are populated by the admin acta (#20), which enforces that quarters + OT sum to the
-  final score. `home_score`/`away_score` stay the FINAL score (incl. OT), so `diff` and
-  `teamOutcome()` need no changes.
-- **Still to build:** the chart itself (score differential or both scores per period), a
-  `1 2 3 4 | PR | Final` scoreboard, and the view selector. Unlocks later: 4th-quarter
+- **Data layer.** `getMatch()` and `MatchDetail` (`src/lib/db.ts`) now select the
+  period columns; `matchesQuery` stays lean, so Calendario/Inicio do not pay for them.
+- **Chart.** New `src/components/QuarterChart.astro` — a single combined hand-rolled
+  SVG (no chart dependency), two polylines with dots for home/away, per-point value
+  labels, Y axis `0..max` (highest points scored in any period by either team) with
+  gridlines. Overtime periods are only added when played, at **half a quarter's X
+  width** (they are half the time played), labelled `PR1..PR3`. Legend uses the team
+  names; home `#641B24`, away `#2563eb`. `role="img"` + descriptive `aria-label`.
+- **Placement.** Renders under the player-stats grid and above Observaciones/acta
+  (which both moved below the stats). Chart is independent of the box score, so it
+  shows whenever quarters exist even if no player stats were entered.
+- **Actas.** The acta link is now a small **«VER ACTA»** button with a lucide
+  `clipboard-list` inline SVG (project convention: no icon library).
+- **Dropped from the original idea:** the `1 2 3 4 | PR | Final` scoreboard and the
+  view selector (score differential vs both scores). Still unlocked later: 4th-quarter
   comebacks, per-quarter averages, largest lead.
 - `matchesQuery` (`src/lib/db.ts:111-127`) stays lean — only `getMatch` needs the period
   columns, so Calendario/Inicio don't pay for them.
