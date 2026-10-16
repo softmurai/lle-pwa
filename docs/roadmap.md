@@ -338,6 +338,8 @@ A match may now finish tied. Decided 2026-10-16:
 - **Public UI.** New **E** column (amber, tooltip «Empates») after D on Clasificación
   and the Inicio mini-table (sortable `data-colN` renumbered); RACHA badge `T` =
   amber-400; `equipos` card «XV–YE–ZD»; `equipos/[id]` «… empates …».
+- **ScoreBadge.** Tied scorelines get a neutral outline (`border-gray-400` card /
+  `border-white/40` hero) and a stacked «EMPATE» label (`src/components/ScoreBadge.astro`).
 - **Tiebreakers unchanged:** PTS → +/- → PF (no head-to-head; revisit if tied teams
   collide often).
 

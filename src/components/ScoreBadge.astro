@@ -7,6 +7,7 @@ interface Props {
 
 const { home, away, variant = 'card' } = Astro.props;
 const played = home != null && away != null;
+const tie = played && home === away;
 
 const shell =
 	variant === 'hero'
@@ -22,15 +23,29 @@ const size = played
 		: 'font-display text-sm tracking-wide uppercase';
 
 const tone = played ? '' : variant === 'hero' ? 'text-white/90' : 'text-gray-400';
+
+// Tied game: neutral outline + stacked EMPATE label.
+const tieBorder = tie ? (variant === 'hero' ? 'border border-white/40' : 'border border-gray-400') : '';
+const tieStack = tie ? 'inline-flex flex-col items-center leading-tight' : '';
+const tieLabel = variant === 'hero' ? 'text-white/70' : 'text-gray-500';
 ---
 
 <span
-	class={[shell, size, tone].join(' ')}
-	title={played ? undefined : 'Próximamente'}
+	class={[shell, size, tone, tieBorder, tieStack].join(' ')}
+	title={played ? (tie ? 'Empate' : undefined) : 'Próximamente'}
 >
 	{
 		played ? (
-			`${home} – ${away}`
+			<>
+				<span>{`${home} – ${away}`}</span>
+				{tie && (
+					<span
+						class={`text-[10px] font-medium tracking-[0.15em] ${tieLabel}`}
+					>
+						EMPATE
+					</span>
+				)}
+			</>
 		) : (
 			<>
 				<span class="hidden sm:inline">PRÓXIMAMENTE</span>
