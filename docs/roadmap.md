@@ -78,8 +78,13 @@ On `/partidos/[id]`:
 
 - **"Ver acta" button** — `done` (2026-10-14). Uploaded acta photo stored in R2
   (`acta_photo_key`); served same-origin via `src/pages/actas/[file].ts`; linked from
-  the match page. See #20. Restyled (2026-10-16) from a text link to a small
-  **«VER ACTA»** button with a lucide `clipboard-list` icon (see #11).
+  the match page. See #20. Reworked (2026-10-16) into a bigger **«VER ACTA»** button
+  that opens the photo in a modal viewer (see #11). The button is **only rendered when
+  `acta_photo_key` is set**, so matches without an uploaded acta show nothing. The
+  viewer fixes (2026-10-16): the `<img>` is capped at `max-h-[85dvh] max-w-[92vw]`
+  (was a fixed 85dvh×92vw frame that letterboxed photos — now the card hugs the photo),
+  and it is `loading="eager"` because a lazy image inside a hidden `<dialog>` may never
+  load. Clicking the photo's framing area or the backdrop also closes the viewer.
 - **"Observaciones / Notas"** — `done` (2026-10-14). `matches.observations`, rendered
   on the match page. See #20. Moved (2026-10-16) below the player stats + quarter chart.
 - **"Aplazado/Adelantado desde …" badge** — `done` (2026-10-14). Derived from
@@ -108,26 +113,31 @@ On `/partidos/[id]`:
 
 ### 11. Quarter-by-quarter score graph `done` — 2026-10-16
 
-On `/partidos/[id]`, charts the per-quarter score evolution across `Q1..Q4` + OT.
+On `/partidos/[id]`, charts the **cumulative** score evolution across `1C..4C` + OT.
 
 - **Data layer.** `getMatch()` and `MatchDetail` (`src/lib/db.ts`) now select the
   period columns; `matchesQuery` stays lean, so Calendario/Inicio do not pay for them.
 - **Chart.** New `src/components/QuarterChart.astro` — a single combined hand-rolled
-  SVG (no chart dependency), two polylines with dots for home/away, per-point value
-  labels, Y axis `0..max` (highest points scored in any period by either team) with
-  gridlines. Overtime periods are only added when played, at **half a quarter's X
-  width** (they are half the time played), labelled `PR1..PR3`. Legend uses the team
-  names; home `#641B24`, away `#2563eb`. `role="img"` + descriptive `aria-label`.
+  SVG (no chart dependency), minimalist: one gridline + label every **10** points,
+  cumulative polylines with a dot per period, both lines starting from 0 on the Y axis.
+  Overtime periods are only added when played, at **half a quarter's X width** (they are
+  half the time played), labelled `PR1..PR3`. X labels `1C..4C` match the admin acta.
+- **Score tags.** Each plotted point carries the team's running score. The team ahead at
+  that quarter gets its tag above the point, the trailing team's below, so the two never
+  collide (ties: home above).
+- **Colours.** Home red `#B21E2B`, away blue `#1F5FBF` — brightened within the brand
+  families so the lines are easy to tell apart. Legend keys are a line with a dot in the
+  middle. `role="img"` + descriptive `aria-label`.
 - **Placement.** Renders under the player-stats grid and above Observaciones/acta
   (which both moved below the stats). Chart is independent of the box score, so it
   shows whenever quarters exist even if no player stats were entered.
-- **Actas.** The acta link is now a small **«VER ACTA»** button with a lucide
-  `clipboard-list` inline SVG (project convention: no icon library).
-- **Dropped from the original idea:** the `1 2 3 4 | PR | Final` scoreboard and the
-  view selector (score differential vs both scores). Still unlocked later: 4th-quarter
-  comebacks, per-quarter averages, largest lead.
-- `matchesQuery` (`src/lib/db.ts:111-127`) stays lean — only `getMatch` needs the period
-  columns, so Calendario/Inicio don't pay for them.
+- **Actas.** The acta is a **«VER ACTA»** button (lucide `clipboard-list` inline SVG,
+  no icon library) that opens the photo in a **modal viewer** (`<dialog>` +
+  `showModal()`): dimmed page via `::backdrop`, round × close, ESC and
+  click-outside-to-close. Replaced the earlier new-tab link.
+- **Dropped from the original idea:** the `1 2 3 4 | PR | Final` scoreboard (the per-point
+  score tags cover it) and the view selector (score differential vs both scores). Still
+  unlocked later: 4th-quarter comebacks, per-quarter averages, largest lead.
 
 ### 12. Master data is seeded, not imported `done` — 2026-10-10
 

@@ -82,8 +82,8 @@ const nameClasses = (outcome: TeamOutcome | null, align: '' | 'text-right') => {
 >
 	{
 		match ? (
-			<div class="mx-auto max-w-5xl px-4 py-8">
-				<div class="mt-3 flex items-center justify-between gap-3 sm:hidden">
+			<div class="mx-auto max-w-5xl px-4 pt-4 pb-6">
+				<div class="flex items-center justify-between gap-3 sm:hidden">
 					<div class="flex min-w-0 flex-col text-sm text-gray-500">
 						<a
 							href="/calendario"
@@ -335,13 +335,15 @@ const nameClasses = (outcome: TeamOutcome | null, align: '' | 'text-right') => {
 								away={awayPeriods}
 								homeName={match.home_team}
 								awayName={match.away_team}
+								homeShort={match.home_short}
+								awayShort={match.away_short}
 							/>
 						</div>
 					)
 				}
 
 				{
-					(moved || match.observations || match.acta_photo_key) && (
+					(moved || match.observations) && (
 						<div class="mt-4 space-y-3">
 							{moved && match.original_date && (
 								<MovedBadge originalDate={match.original_date} date={match.date} />
@@ -356,17 +358,66 @@ const nameClasses = (outcome: TeamOutcome | null, align: '' | 'text-right') => {
 									</p>
 								</div>
 							)}
-							{match.acta_photo_key && (
-								<a
-									href={`/${match.acta_photo_key}`}
-									target="_blank"
-									rel="noreferrer"
-									class="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold tracking-wide text-[#79131f] uppercase shadow-sm transition hover:bg-gray-50"
+						</div>
+					)
+				}
+
+				{
+					match.acta_photo_key && (
+						<div class="mt-6">
+							<button
+								type="button"
+								data-acta-open
+								class="flex w-full items-center justify-center gap-2.5 rounded-xl bg-[#641B24] px-6 py-3 text-sm font-semibold tracking-wide text-white uppercase shadow-sm transition hover:bg-[#7a2130] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#641B24]/40 focus-visible:ring-offset-2 sm:mx-auto sm:w-fit"
+							>
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									width="20"
+									height="20"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									aria-hidden="true"
+								>
+									<rect width="8" height="4" x="8" y="2" rx="1" ry="1"></rect>
+									<path
+										d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"
+									></path>
+									<path d="M12 11h4"></path>
+									<path d="M12 16h4"></path>
+									<path d="M8 11h.01"></path>
+									<path d="M8 16h.01"></path>
+								</svg>
+								Ver acta
+							</button>
+
+							<dialog
+								id="acta-dialog"
+								aria-label="Acta del partido"
+								class="m-auto max-h-none max-w-none border-0 bg-transparent p-0"
+							>
+								<div data-acta-backdrop class="relative flex items-center justify-center">
+									<img
+										src={`/${match.acta_photo_key}`}
+										alt={`Acta del partido ${match.home_team} contra ${match.away_team}`}
+										loading="eager"
+										decoding="async"
+										class="h-auto max-h-[85dvh] w-auto max-w-[92vw] rounded-xl bg-white object-contain shadow-2xl"
+									/>
+								</div>
+								<button
+									type="button"
+									data-acta-close
+									aria-label="Cerrar"
+									class="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-black/60 text-white transition hover:bg-black/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
 								>
 									<svg
 										xmlns="http://www.w3.org/2000/svg"
-										width="15"
-										height="15"
+										width="20"
+										height="20"
 										viewBox="0 0 24 24"
 										fill="none"
 										stroke="currentColor"
@@ -375,24 +426,17 @@ const nameClasses = (outcome: TeamOutcome | null, align: '' | 'text-right') => {
 										stroke-linejoin="round"
 										aria-hidden="true"
 									>
-										<rect width="8" height="4" x="8" y="2" rx="1" ry="1"></rect>
-										<path
-											d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"
-										></path>
-										<path d="M12 11h4"></path>
-										<path d="M12 16h4"></path>
-										<path d="M8 11h.01"></path>
-										<path d="M8 16h.01"></path>
+										<path d="M18 6 6 18"></path>
+										<path d="m6 6 12 12"></path>
 									</svg>
-									Ver acta
-								</a>
-							)}
+								</button>
+							</dialog>
 						</div>
 					)
 				}
 			</div>
 		) : (
-			<div class="mx-auto max-w-5xl px-4 py-8">
+			<div class="mx-auto max-w-5xl px-4 pt-4 pb-6">
 				<div
 					class="rounded-xl border border-dashed border-gray-300 bg-white p-8 text-center text-gray-500"
 				>
@@ -405,4 +449,27 @@ const nameClasses = (outcome: TeamOutcome | null, align: '' | 'text-right') => {
 
 <script>
 	import '../../lib/team-names';
+
+	const dialog = document.getElementById('acta-dialog') as HTMLDialogElement | null;
+	const openBtn = document.querySelector<HTMLButtonElement>('[data-acta-open]');
+	const closeBtn = document.querySelector<HTMLButtonElement>('[data-acta-close]');
+
+	if (dialog && openBtn) {
+		openBtn.addEventListener('click', () => dialog.showModal());
+		closeBtn?.addEventListener('click', () => dialog.close());
+		// Clicking the dimmed backdrop — or the framing area around the photo —
+		// closes the viewer. ESC is handled natively by <dialog>.
+		dialog.addEventListener('click', (event) => {
+			const target = event.target as HTMLElement | null;
+			const isPhoto = target?.closest('img') != null;
+			if (isPhoto) return;
+			if (target === dialog || target?.hasAttribute('data-acta-backdrop')) dialog.close();
+		});
+	}
 </script>
+
+<style is:global>
+	#acta-dialog::backdrop {
+		background-color: rgb(0 0 0 / 0.7);
+	}
+</style>
