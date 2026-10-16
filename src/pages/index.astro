@@ -24,8 +24,29 @@ const hasSchedule = upcomingWeek !== null || lastPlayedWeek !== null;
 		<h1 class="sr-only">Liga Elche Baloncesto</h1>
 
 		{
-			upcomingWeek !== null && (
+			lastPlayedWeek !== null && (
 				<section>
+					<div class="flex items-baseline justify-between gap-3">
+						<h2 class="font-display text-2xl tracking-wide">ÚLTIMA JORNADA</h2>
+						<a
+							href="/calendario"
+							class="shrink-0 text-sm font-medium text-[#79131f] hover:underline"
+						>
+							Ver resultados →
+						</a>
+					</div>
+					<p class="mt-0.5 text-sm text-gray-400">
+						Jornada {lastPlayedWeek}
+						{lastPlayedDate ? ` · ${formatDate(lastPlayedDate)}` : ''}
+					</p>
+					<MatchGrid matches={lastPlayedMatches} />
+				</section>
+			)
+		}
+
+		{
+			upcomingWeek !== null && (
+				<section class={lastPlayedWeek !== null ? 'mt-8' : undefined}>
 					<div class="flex items-baseline justify-between gap-3">
 						<h2 class="font-display text-2xl tracking-wide">PRÓXIMA JORNADA</h2>
 						<a
@@ -46,27 +67,6 @@ const hasSchedule = upcomingWeek !== null || lastPlayedWeek !== null;
 					) : (
 						<MatchGrid matches={upcomingMatches} />
 					)}
-				</section>
-			)
-		}
-
-		{
-			lastPlayedWeek !== null && (
-				<section class="mt-8">
-					<div class="flex items-baseline justify-between gap-3">
-						<h2 class="font-display text-2xl tracking-wide">ÚLTIMA JORNADA</h2>
-						<a
-							href="/calendario"
-							class="shrink-0 text-sm font-medium text-[#79131f] hover:underline"
-						>
-							Ver resultados →
-						</a>
-					</div>
-					<p class="mt-0.5 text-sm text-gray-400">
-						Jornada {lastPlayedWeek}
-						{lastPlayedDate ? ` · ${formatDate(lastPlayedDate)}` : ''}
-					</p>
-					<MatchGrid matches={lastPlayedMatches} />
 				</section>
 			)
 		}
