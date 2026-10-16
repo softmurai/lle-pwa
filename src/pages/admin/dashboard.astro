@@ -51,37 +51,63 @@ const fmt = (iso: string) =>
 			<table class="w-full text-sm">
 				<thead class="bg-gray-50 text-left text-xs tracking-wide text-gray-500 uppercase">
 					<tr>
-						<th class="px-4 py-2">Jornada</th>
-						<th class="px-4 py-2">Fechas</th>
-						<th class="px-4 py-2 text-center">Registrados</th>
-						<th class="px-4 py-2 text-center">Pendientes</th>
-						<th class="px-4 py-2"></th>
+						<th class="px-3 py-2 sm:px-4">Jornada</th>
+						<th class="px-3 py-2 sm:px-4">Fechas</th>
+						<th class="px-3 py-2 text-center sm:px-4">Registrados</th>
 					</tr>
 				</thead>
 				<tbody class="divide-y divide-gray-100">
 					{
 						jornadas.map((j) => (
 							<tr class="hover:bg-gray-50">
-								<td class="px-4 py-2 font-medium">{j.week}</td>
-								<td class="px-4 py-2 text-gray-600">
+								<td class="px-3 py-2 font-medium sm:px-4">{j.week}</td>
+								<td class="px-3 py-2 text-gray-600 whitespace-nowrap sm:px-4">
 									{j.first_date === j.last_date
 										? fmt(j.first_date)
 										: `${fmt(j.first_date)} – ${fmt(j.last_date)}`}
 								</td>
-								<td class="px-4 py-2 text-center">{j.played}/{j.total}</td>
-								<td class="px-4 py-2 text-center">
-									{j.pending === 0 ? (
-										<span class="text-green-600">✓</span>
-									) : (
-										<span class="font-medium text-amber-600">{j.pending}</span>
-									)}
-								</td>
-								<td class="px-4 py-2 text-right">
+								<td class="px-3 py-2 text-center sm:px-4">
 									<a
 										href={`/admin/actas/${j.week}`}
-										class="text-[#641B24] hover:underline"
+										class={
+											'inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors ' +
+											(j.pending > 0
+												? 'border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100'
+												: 'border-green-200 bg-green-50 text-green-700 hover:bg-green-100')
+										}
+										aria-label={
+											j.pending > 0
+												? `${j.played} de ${j.total} actas registradas · ${j.pending} pendientes`
+												: `${j.played} de ${j.total} actas registradas`
+										}
+										title={
+											j.pending > 0
+												? `${j.pending} actas pendientes`
+												: 'Todas las actas registradas'
+										}
 									>
-										Actas →
+										<span>
+											{j.played}/{j.total}
+										</span>
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											width="16"
+											height="16"
+											viewBox="0 0 24 24"
+											fill="none"
+											stroke="currentColor"
+											stroke-width="2"
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											aria-hidden="true"
+										>
+											<path d="M16 4h2a2 2 0 0 1 2 2v2" />
+											<path
+												d="M21.34 15.664a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"
+											/>
+											<path d="M8 22H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+											<rect x="8" y="2" width="8" height="4" rx="1" />
+										</svg>
 									</a>
 								</td>
 							</tr>

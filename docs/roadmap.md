@@ -181,10 +181,11 @@ On `/partidos/[id]`, chart the score evolution across `Q1..Q4` + OT.
 
 ### 20. Admin panel — auth, actas, jornadas `done` — built 2026-10-14, deployed 2026-10-15
 
-Password-protected area at `/admin` (not linked from the public nav). Deployed: **yes**
+Password-protected area at `/admin`. Deployed: **yes**
 (2026-10-15) — remote migrations applied via CI and the `ADMIN_USERS` secret set on the
 `lle-pwa` Worker. Routes are network-only in the service worker (`public/sw.js`,
-`VERSION` → `lle-v5`).
+`VERSION` → `lle-v5`). Linked from the public header since 2026-10-16: `Nav.astro` ends
+with a lucide `shield-cog-corner` icon link to `/admin`, visible at all breakpoints.
 
 - **Auth (custom, replaces Cloudflare Access for this).** `src/lib/auth.ts` +
   `migrations/0013_admin_auth.sql` (`admin_sessions`, `login_attempts`; user records
@@ -219,6 +220,12 @@ Password-protected area at `/admin` (not linked from the public nav). Deployed: 
     player points («Suma puntuación jugadores», red when it doesn't match the score).
     Each team's table spans the full width, stacked (local team first, then visitor) so
     long names don't force horizontal scroll.
+- **Dashboard (`admin/dashboard.astro`).** Jornadas table consolidated to three
+  columns (`Jornada · Fechas · Registrados`, 2026-10-16) so it fits narrow phones.
+  The old Registrados/Pendientes/Actas columns merged into one: `N/4` + a lucide
+  `clipboard-pen` icon inside a link to `/admin/actas/{week}`, tinted amber when
+  actas are pending and green when complete (pending signal kept via colour +
+  `title`/`aria-label`).
 - **Jornadas.** `admin/jornadas/cambiar.astro` + `components/admin/ScheduleBoard.tsx`:
   edit date/time/venue and postpone. `matches.venue_id` (§#19), plus
   `observations`, `acta_photo_key`, `original_date` (`0012_extend_matches.sql`).
