@@ -242,6 +242,12 @@ with a lucide `shield-cog-corner` icon link to `/admin`, visible at all breakpoi
   calendar is live (56 matches / 8 standings rows / 0 stats). `ADMIN_USERS` secret set on
   the `lle-pwa` Worker and production login verified. `/admin/login` redirects to
   `/admin` (`src/pages/admin/login.astro`).
+- **Back to public app (2026-10-16).** The login page (`admin/index.astro`) shows a
+  «Volver a Inicio» button («Volver a App» on mobile, `<sm`) → `/` below the card, and
+  `api/admin/logout.ts` now 303-redirects to `/` (was `/admin`) so «Cerrar sesión» lands
+  on the public main app. Decided: **no**
+  back-link in the `AdminLayout` header — leaving the panel to the public site happens via
+  logout only.
 - **Mobile pass.** Confirmed OK on the phone (2026-10-15). The exposed admin passwords
   are intentionally kept for now (decided) — rotation is a future follow-up.
 - **Status: complete.** The Excel→SQL path that this panel replaced is dropped (see

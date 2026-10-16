@@ -9,6 +9,6 @@ export const POST: APIRoute = async ({ cookies }) => {
 	cookies.delete(SESSION_COOKIE, { path: '/' });
 	return new Response(null, {
 		status: 303,
-		headers: { Location: '/admin', 'Cache-Control': 'no-store' },
+		headers: { Location: '/', 'Cache-Control': 'no-store' },
 	});
 };
