@@ -14,7 +14,7 @@ const fmt = (iso: string) =>
 	new Date(`${iso}T00:00:00`).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
 ---
 
-<AdminLayout title="Inicio">
+<AdminLayout title="Inicio" pullToRefresh>
 	<h1 class="font-display text-3xl tracking-wide text-[#641B24]">Hola, {admin?.username}</h1>
 	<p class="mt-1 text-sm text-gray-600">
 		Panel de gestión de la liga. {totalPlayed} partidos registrados · {totalPending} pendientes.

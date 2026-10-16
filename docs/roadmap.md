@@ -138,6 +138,13 @@ On `/partidos/[id]`, chart the score evolution across `Q1..Q4` + OT.
   (viewport/`env(safe-area-inset-bottom)` issue).
 - Fix the installed-PWA home-screen logo on Android (manifest icons / maskable icon
   issue). *(merged from the former #18)*
+- Pull-to-refresh (custom, 2026-10-16) — `src/lib/pull-to-refresh.ts` + indicator markup
+  in `Layout.astro`/`AdminLayout.astro` + styles in `global.css`. Standalone-only
+  (or a `?ptr=1` dev override), touch-only. The page content stays still; a brand
+  basketball emerges from under the bottom edge of the header and travels down to a
+  third of the viewport height as you pull, releasing past ~70px reloads. Enabled on all
+  public pages (via `Layout`) and `/admin/dashboard` (via the `pullToRefresh` prop on
+  `AdminLayout`); other admin pages are untouched.
 
 ### 17. Inicio rework `done` — 2026-10-15
 

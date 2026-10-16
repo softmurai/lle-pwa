@@ -50,3 +50,64 @@ thead th:nth-last-child(-n + 2) .group > .absolute > .absolute {
 	right: 0.5rem;
 	translate: none;
 }
+
+/* Pull-to-refresh (mobile PWA only, see src/lib/pull-to-refresh.ts) */
+.pwa-standalone {
+	overscroll-behavior-y: contain;
+}
+
+/*
+ * The indicator sits below the header (z-20), hidden behind it at progress 0,
+ * and travels down to a third of the viewport height (--ptr-travel) as you pull.
+ */
+.ptr-indicator {
+	position: fixed;
+	top: var(--ptr-top, 0px);
+	left: 50%;
+	z-index: 10;
+	width: 28px;
+	height: 28px;
+	transform: translate(
+		-50%,
+		calc(-28px + var(--ptr-progress, 0) * var(--ptr-travel, 0px))
+	);
+	opacity: min(1, calc(var(--ptr-progress, 0) * 3));
+	transition:
+		opacity 0.25s ease,
+		transform 0.25s ease;
+	pointer-events: none;
+}
+
+.ptr-indicator.ptr-dragging {
+	transition: none;
+}
+
+.ptr-spinner {
+	display: block;
+	width: 28px;
+	height: 28px;
+	color: #641b24;
+	transform: rotate(calc(var(--ptr-progress, 0) * 270deg));
+	transition: transform 0.25s ease;
+}
+
+.ptr-indicator.ptr-dragging .ptr-spinner {
+	transition: none;
+}
+
+.ptr-indicator.refreshing .ptr-spinner {
+	animation: ptr-spin 0.7s linear infinite;
+}
+
+@keyframes ptr-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.ptr-indicator,
+	.ptr-spinner {
+		transition: none;
+	}
+}
