@@ -464,11 +464,13 @@ export default function ActaForm({ match, homePlayers, awayPlayers, stats }: Pro
 								</tbody>
 							</table>
 						</div>
-						{issues.has('match.tie') && (
-							<p className="mt-2 text-sm font-medium text-red-600">{issues.get('match.tie')}</p>
-						)}
 						{issues.has('match.ot') && (
 							<p className="mt-2 text-sm font-medium text-red-600">{issues.get('match.ot')}</p>
+						)}
+						{status === 'finished' && homeScore === awayScore && (
+							<p className="mt-2 text-sm font-medium text-amber-700">
+								Empate — cada equipo sumará 1 punto de liga.
+							</p>
 						)}
 					</section>
 

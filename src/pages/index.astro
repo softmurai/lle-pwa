@@ -93,6 +93,7 @@ const hasSchedule = upcomingWeek !== null || lastPlayedWeek !== null;
 									<th class="px-3 py-3 font-medium text-right"><ThTooltip label="PJ" /></th>
 									<th class="px-3 py-3 font-medium text-right"><ThTooltip label="V" /></th>
 									<th class="px-3 py-3 font-medium text-right"><ThTooltip label="D" /></th>
+									<th class="px-3 py-3 font-medium text-right"><ThTooltip label="E" /></th>
 									<th class="px-3 py-3 font-medium text-right"><ThTooltip label="NP" /></th>
 									<th class="px-3 py-3 font-medium text-right"><ThTooltip label="PF" /></th>
 									<th class="px-3 py-3 font-medium text-right"><ThTooltip label="PC" /></th>
@@ -123,6 +124,9 @@ const hasSchedule = upcomingWeek !== null || lastPlayedWeek !== null;
 										</td>
 										<td class="px-3 py-2.5 text-right tabular-nums text-rose-600">
 											{r.losses}
+										</td>
+										<td class="px-3 py-2.5 text-right tabular-nums text-amber-600">
+											{r.ties}
 										</td>
 										<td class="px-3 py-2.5 text-right tabular-nums text-gray-700">
 											{r.forfeits}
@@ -157,9 +161,11 @@ const hasSchedule = upcomingWeek !== null || lastPlayedWeek !== null;
 															? 'bg-gray-200'
 															: res === 'W'
 																? 'bg-emerald-500'
-																: res === 'F'
-																	? 'bg-gray-900'
-																	: 'bg-rose-500';
+																: res === 'T'
+																	? 'bg-amber-400'
+																	: res === 'F'
+																		? 'bg-gray-900'
+																		: 'bg-rose-500';
 													return (
 														<span
 															class={['inline-block h-2 w-2 rounded-full', cls].join(' ')}

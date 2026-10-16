@@ -101,7 +101,7 @@ On `/partidos/[id]`:
   - **2P** «Tiros de 2 anotados», **3P** «Triples anotados», **TL**
     «Tiros libres anotados», **TLI** «Tiros libres intentados», **TL%**
     «Porcentaje de tiros libres», **Fal** «Faltas», **RACHA** «Últimos 5 partidos»
-  - Applies to: Clasificación + Inicio standings (PJ/V/D/NP/PF/PC/±/PTS/RACHA), Jugadores
+  - Applies to: Clasificación + Inicio standings (PJ/V/D/E/NP/PF/PC/±/PTS/RACHA), Jugadores
     (PJ), Equipos/`[id]` roster (PJ/Pts·PJ/2P/3P/TL%), Partido/`[id]` box score
     (P/2P/3P/TL/TLI/Fal).
 
@@ -214,7 +214,8 @@ with a lucide `shield-cog-corner` icon link to `/admin`, visible at all breakpoi
 - **Actas.** `admin/actas/*` + `components/admin/ActaForm.tsx` (React island) +
   `api/admin/matches/[id]/results.ts`. Validates via one shared plain-TS module
   (`src/lib/validation/match-acta.ts`): quarters+OT sum to final, player points sum to
-  team total, roster membership, fouls (≤5), TLI ≥ TLA, no ties, forfeit → 20-0 with
+  team total, roster membership, fouls (≤5), TLI ≥ TLA, ties allowed (1 pt each, #23),
+  forfeit → 20-0 with
   NULL quarters. Delete+reinsert `match_stats`, recompute `standings` in one batch.
   Statuses: `scheduled` / `finished` / `forfeit` / `postponed` / `cancelled`.
   Photo upload to R2 via `api/admin/matches/[id]/acta-photo.ts`.
@@ -316,6 +317,29 @@ span more than one date.
 - `MatchRow` now carries `original_date` (`src/lib/db.ts`, `matchesQuery`).
 - Shared badge/label: `src/components/MovedBadge.astro` + `movedLabel()`
   (`src/lib/format.ts`), reused by the match page and `MatchGrid.astro` cards.
+
+### 23. Tied games — "empates" `done` — 2026-10-16
+
+A match may now finish tied. Decided 2026-10-16:
+
+- **Rules.** A tie is allowed at any point — even after regulation, no overtime required
+  (the old validation rule "no puede acabar en empate: añade prórroga" is removed from
+  `src/lib/validation/match-acta.ts`). League points stay **V=2, D=1, E=1**, so a tie
+  awards the same league points as a loss; only the V–E–D record and +/- differ.
+  Overtime symmetry (both teams record the same number of OTs) still applies.
+- **Schema.** `migrations/0018_add_standings_ties.sql`: `standings.ties` (default 0).
+  No backfill needed (no ties existed; all matches were `scheduled`).
+- **Computation** (`src/lib/db.ts`): `recomputeStandings()` gained a tie branch
+  (both teams `ties++`, `points += 1`). Before this, a tied `finished` match would have
+  credited **0 points to both** teams. `getStandings()` form badges gained `'T'` (a tie
+  previously rendered as two `L`); `getTeams()`/`getTeam()` select `ties`.
+- **Admin acta.** `ActaForm.tsx` no longer shows the red tie error; when the totals are
+  equal it shows an amber informational note «Empate — cada equipo sumará 1 punto de liga».
+- **Public UI.** New **E** column (amber, tooltip «Empates») after D on Clasificación
+  and the Inicio mini-table (sortable `data-colN` renumbered); RACHA badge `T` =
+  amber-400; `equipos` card «XV–YE–ZD»; `equipos/[id]` «… empates …».
+- **Tiebreakers unchanged:** PTS → +/- → PF (no head-to-head; revisit if tied teams
+  collide often).
 
 ---
 

@@ -196,12 +196,7 @@ export function validateMatchResult(
 	const homeScore = sumQuarters(input.home);
 	const awayScore = sumQuarters(input.away);
 
-	if (homeScore === awayScore) {
-		issues.push({
-			path: 'match.tie',
-			message: 'Un partido finalizado no puede acabar en empate: añade prórroga',
-		});
-	}
+	// A tied final score is legal: each team gets 1 league point.
 
 	// OT must be present for both sides in the same number of periods.
 	const otCount = (s: QuarterScores) => (s.ot1 == null ? 0 : 1) + (s.ot2 == null ? 0 : 1) + (s.ot3 == null ? 0 : 1);

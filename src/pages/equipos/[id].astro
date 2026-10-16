@@ -44,8 +44,8 @@ const statColumns = [
 						</h1>
 						<div>
 							<p class="text-sm text-gray-500">
-								{team.wins} victorias · {team.losses} derrotas · {team.played}{' '}
-								{team.played === 1 ? 'partido' : 'partidos'}
+								{team.wins} victorias · {team.ties} empates · {team.losses} derrotas ·{' '}
+								{team.played} {team.played === 1 ? 'partido' : 'partidos'}
 							</p>
 							<p class="mt-2">
 								<a

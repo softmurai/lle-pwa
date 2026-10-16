@@ -12,6 +12,7 @@ export const headerTips: Record<string, string> = {
 	PJ: 'Partidos jugados',
 	V: 'Victorias',
 	D: 'Derrotas',
+	E: 'Empates',
 	NP: 'No presentado',
 	PF: 'Puntos a favor',
 	PC: 'Puntos en contra',

@@ -8,12 +8,13 @@ export interface StandingRow {
 	played: number;
 	wins: number;
 	losses: number;
+	ties: number;
 	forfeits: number;
 	points_for: number;
 	points_against: number;
 	diff: number;
 	points: number;
-	form: ('W' | 'L' | 'F')[];
+	form: ('W' | 'L' | 'F' | 'T')[];
 }
 
 export interface FormMatchRow {
@@ -29,7 +30,7 @@ export async function getStandings(limit = 0): Promise<StandingRow[]> {
 	const limitClause = limit > 0 ? `LIMIT ${Math.floor(limit)}` : '';
 	const res = await env.lle_pwa
 		.prepare(
-			`SELECT t.id, t.name, t.short_name, s.played, s.wins, s.losses,
+			`SELECT t.id, t.name, t.short_name, s.played, s.wins, s.losses, s.ties,
 			        s.points_for, s.points_against, s.points,
 			        (s.points_for - s.points_against) AS diff
 			 FROM standings s
@@ -49,12 +50,12 @@ export async function getStandings(limit = 0): Promise<StandingRow[]> {
 		)
 		.all();
 
-	const byTeam = new Map<number, ('W' | 'L' | 'F')[]>();
+	const byTeam = new Map<number, ('W' | 'L' | 'F' | 'T')[]>();
 	const forfeitsByTeam = new Map<number, number>();
 	for (const m of mres.results as unknown as FormMatchRow[]) {
 		const forfeit = m.status === 'forfeit';
-		let homeResult: 'W' | 'L' | 'F' = 'L';
-		let awayResult: 'W' | 'L' | 'F' = 'L';
+		let homeResult: 'W' | 'L' | 'F' | 'T' = 'L';
+		let awayResult: 'W' | 'L' | 'F' | 'T' = 'L';
 		if (forfeit) {
 			if (m.forfeit_team_id === m.home_team_id) {
 				homeResult = 'F';
@@ -65,7 +66,11 @@ export async function getStandings(limit = 0): Promise<StandingRow[]> {
 			}
 		} else {
 			if ((m.home_score ?? 0) > (m.away_score ?? 0)) homeResult = 'W';
-			if ((m.away_score ?? 0) > (m.home_score ?? 0)) awayResult = 'W';
+			else if ((m.away_score ?? 0) > (m.home_score ?? 0)) awayResult = 'W';
+			else {
+				homeResult = 'T';
+				awayResult = 'T';
+			}
 		}
 		byTeam.set(m.home_team_id, [...(byTeam.get(m.home_team_id) ?? []), homeResult]);
 		byTeam.set(m.away_team_id, [...(byTeam.get(m.away_team_id) ?? []), awayResult]);
@@ -177,6 +182,7 @@ export interface TeamRow {
 	played: number;
 	wins: number;
 	losses: number;
+	ties: number;
 }
 
 export async function getTeams(): Promise<TeamRow[]> {
@@ -185,7 +191,8 @@ export async function getTeams(): Promise<TeamRow[]> {
 			`SELECT t.id, t.name, t.short_name, t.logo_url,
 			        COALESCE(s.played, 0) AS played,
 			        COALESCE(s.wins, 0) AS wins,
-			        COALESCE(s.losses, 0) AS losses
+			        COALESCE(s.losses, 0) AS losses,
+			        COALESCE(s.ties, 0) AS ties
 			 FROM teams t
 			 LEFT JOIN standings s ON s.team_id = t.id
 			 ORDER BY t.name COLLATE NOCASE`,
@@ -200,7 +207,8 @@ export async function getTeam(id: number): Promise<TeamRow | null> {
 			`SELECT t.id, t.name, t.short_name, t.logo_url,
 			        COALESCE(s.played, 0) AS played,
 			        COALESCE(s.wins, 0) AS wins,
-			        COALESCE(s.losses, 0) AS losses
+			        COALESCE(s.losses, 0) AS losses,
+			        COALESCE(s.ties, 0) AS ties
 			 FROM teams t
 			 LEFT JOIN standings s ON s.team_id = t.id
 			 WHERE t.id = ?
@@ -664,12 +672,20 @@ export async function recomputeStandings(): Promise<void> {
 		)
 		.all();
 
-	type Acc = { played: number; wins: number; losses: number; pf: number; pa: number; points: number };
+	type Acc = {
+		played: number;
+		wins: number;
+		losses: number;
+		ties: number;
+		pf: number;
+		pa: number;
+		points: number;
+	};
 	const acc = new Map<number, Acc>();
 	const get = (id: number): Acc => {
 		let a = acc.get(id);
 		if (!a) {
-			a = { played: 0, wins: 0, losses: 0, pf: 0, pa: 0, points: 0 };
+			a = { played: 0, wins: 0, losses: 0, ties: 0, pf: 0, pa: 0, points: 0 };
 			acc.set(id, a);
 		}
 		return a;
@@ -728,16 +744,21 @@ export async function recomputeStandings(): Promise<void> {
 			home.losses++;
 			away.points += 2;
 			home.points += 1;
+		} else {
+			home.ties++;
+			away.ties++;
+			home.points += 1;
+			away.points += 1;
 		}
 	}
 
 	const stmts = [...acc.entries()].map(([teamId, a]) =>
 		env.lle_pwa
 			.prepare(
-				`UPDATE standings SET played = ?, wins = ?, losses = ?, points_for = ?, points_against = ?, points = ?
+				`UPDATE standings SET played = ?, wins = ?, losses = ?, ties = ?, points_for = ?, points_against = ?, points = ?
 				 WHERE team_id = ?`,
 			)
-			.bind(a.played, a.wins, a.losses, a.pf, a.pa, a.points, teamId),
+			.bind(a.played, a.wins, a.losses, a.ties, a.pf, a.pa, a.points, teamId),
 	);
 	if (stmts.length) await env.lle_pwa.batch(stmts);
 }
