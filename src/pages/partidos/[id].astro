@@ -8,6 +8,7 @@ import MovedBadge from '../../components/MovedBadge.astro';
 import QuarterChart from '../../components/QuarterChart.astro';
 import type { BoxScoreRow } from '../../lib/db';
 import { getMatch, getMatchBoxScore } from '../../lib/db';
+import { MAX_FOULS } from '../../lib/validation/match-acta';
 import { formatDate, formatTime, movedLabel, teamOutcome, type TeamOutcome } from '../../lib/format';
 
 const rawId = Number(Astro.params.id);
@@ -285,7 +286,14 @@ const nameClasses = (outcome: TeamOutcome | null, align: '' | 'text-right') => {
 															<td class="px-3 py-2 text-right tabular-nums">
 																{r.ft_att}
 															</td>
-															<td class="px-3 py-2 text-right tabular-nums">
+															<td
+																class={[
+																	'px-3 py-2 text-right tabular-nums',
+																	r.fouls >= MAX_FOULS
+																		? 'font-bold text-[#641B24]'
+																		: '',
+																].join(' ')}
+															>
 																{r.fouls}
 															</td>
 														</tr>
