@@ -367,6 +367,39 @@ A match may now finish tied. Decided 2026-10-16:
 - **Tiebreakers unchanged:** PTS → +/- → PF (no head-to-head; revisit if tied teams
   collide often).
 
+### 24. Pre-structured turno times + single-court venue conflicts `done` — 2026-10-17
+
+Future jornadas now carry a provisional turno time before venues/kick-offs are
+confirmed, and the admin conflict check respects venue capacity.
+
+- **Data.** `migrations/0020_seed_turno_times.sql` fills `time` for weeks 2–14
+  (52 matches) with the four turnos — T1 `08:30`, T2 `10:00`, T3 `11:30`,
+  T4 `13:00` — following the league workbook turno order. Guarded by
+  `status='scheduled' AND time IS NULL`, so it never overwrites an admin edit.
+  Jornada 1 is untouched. The two moved games keep their new-date turno
+  (19-dic = T3, 13-feb = T1).
+- **UI.** `formatTurno()` in `src/lib/format.ts` maps those hours to
+  `1er Turno` / `2o Turno` / `3er Turno` / `4o Turno`, with every ordinal suffix
+  (`er`, `o`) rendered as a `<sup>` (the helper returns trusted HTML, rendered
+  via `set:html`). When the venue has no `maps_url` (`isTbdVenue`, i.e. "Por
+  determinar") the cards (`MatchGrid.astro`) and the `/partidos/[id]` headers
+  show the turno label instead of the hour; any other time falls back to
+  `formatTime()`.
+- **Ordering.** `getAllMatches()` (Calendario) and `getWeekMatches()` /
+  `getMatchesByWeek()` (Inicio, admin board) now sort by
+  `date ASC, (time IS NULL), time ASC, id ASC`, so grids follow turno order and
+  empty slots sink to the bottom.
+- **Venue capacity.** `migrations/0019_venues_single_court.sql` adds
+  `venues.single_court` (default 1). Only **Parque Deportivo**, **Pabellón
+  Altet** and **Toscar Exterior** keep 1 and can fire a venue conflict; **Palau
+  UMH**, **Toscar Interior** (multi-court pavilions) and **Por determinar**
+  (not a real court) are set to 0 and never block. `getVenueConflicts()` checks
+  the flag before querying.
+- **Accepted trade-off:** two provisional ("Por determinar") games can share the
+  same turno without a warning — the guardrail only exists for single-court
+  venues. Team clashes (same teams, same date) and special-date warnings are
+  unchanged.
+
 ---
 
 ## Dropped (not doing)

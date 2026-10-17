@@ -9,12 +9,23 @@ import QuarterChart from '../../components/QuarterChart.astro';
 import type { BoxScoreRow } from '../../lib/db';
 import { getMatch, getMatchBoxScore } from '../../lib/db';
 import { MAX_FOULS } from '../../lib/validation/match-acta';
-import { formatDate, formatTime, movedLabel, teamOutcome, type TeamOutcome } from '../../lib/format';
+import { formatDate, formatTime, formatTurno, isTbdVenue, movedLabel, teamOutcome, type TeamOutcome } from '../../lib/format';
 
 const rawId = Number(Astro.params.id);
 const match = Number.isNaN(rawId) ? null : await getMatch(rawId);
 const rows = match ? await getMatchBoxScore(rawId) : [];
 if (!match) Astro.response.status = 404;
+
+/**
+ * Unconfirmed venues show the turno label instead of the raw hour, since the
+ * time is only a pre-structured slot until the admin confirms it. The label is
+ * trusted HTML (superscript ordinal), so it is rendered with `set:html`.
+ */
+const matchTimeLabel = match
+	? isTbdVenue(match.venue_maps)
+		? formatTurno(match.time) || formatTime(match.time)
+		: formatTime(match.time)
+	: '';
 
 const homeRows = rows.filter((r) => r.team_id === match?.home_id);
 const awayRows = rows.filter((r) => r.team_id === match?.away_id);
@@ -98,7 +109,7 @@ const nameClasses = (outcome: TeamOutcome | null, align: '' | 'text-right') => {
 						<div class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
 							{match.time && (
 								<>
-									<span>{formatTime(match.time)}</span>
+									<span set:html={matchTimeLabel} />
 								</>
 							)}
 							<span class="mr-1">{formatDate(match.date)}</span>
@@ -154,7 +165,7 @@ const nameClasses = (outcome: TeamOutcome | null, align: '' | 'text-right') => {
 				<div class="mt-1 hidden flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500 sm:flex">
 					{match.time && (
 						<>
-							<span>{formatTime(match.time)}</span>
+							<span set:html={matchTimeLabel} />
 						</>
 					)}
 					<span class="mr-2">{formatDate(match.date)}</span>

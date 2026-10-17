@@ -37,6 +37,36 @@ export function formatTime(time: string | null | undefined): string {
 	return `${hour}:${m ?? '00'}h`;
 }
 
+/**
+ * Pre-structured turno slots used while a match has no confirmed venue/time.
+ * Values are trusted HTML so the ordinal suffix of every label renders as a
+ * superscript; render them with `set:html`. Returns '' for any other hour so
+ * callers can fall back to formatTime().
+ */
+const TURNO_LABELS: Record<string, string> = {
+	'08:30': '1<sup>er</sup> Turno',
+	'10:00': '2<sup>o</sup> Turno',
+	'11:30': '3<sup>er</sup> Turno',
+	'13:00': '4<sup>o</sup> Turno',
+};
+
+export function formatTurno(time: string | null | undefined): string {
+	if (!time) return '';
+	const [h, m] = time.split(':');
+	const hour = Number.parseInt(h ?? '', 10);
+	if (Number.isNaN(hour)) return '';
+	const key = `${String(hour).padStart(2, '0')}:${(m ?? '00').padStart(2, '0')}`;
+	return TURNO_LABELS[key] ?? '';
+}
+
+/**
+ * A match with no maps link has no confirmed venue yet ("Por determinar"), so
+ * its time is a provisional turno slot rather than a real kick-off hour.
+ */
+export function isTbdVenue(mapsUrl: string | null | undefined): boolean {
+	return !mapsUrl;
+}
+
 export type MovedLabel = 'Aplazado' | 'Adelantado';
 
 export function movedLabel(

@@ -139,11 +139,15 @@ async function matchesQuery(where = '', orderBy = '', bind: unknown[] = []): Pro
 }
 
 export function getWeekMatches(week: number): Promise<MatchRow[]> {
-	return matchesQuery('WHERE m.week = ?', 'ORDER BY m.time ASC, m.date ASC', [week]);
+	return matchesQuery(
+		'WHERE m.week = ?',
+		'ORDER BY m.date ASC, (m.time IS NULL), m.time ASC, m.id ASC',
+		[week],
+	);
 }
 
 export function getAllMatches(): Promise<MatchRow[]> {
-	return matchesQuery('', 'ORDER BY m.week ASC, m.date ASC');
+	return matchesQuery('', 'ORDER BY m.week ASC, m.date ASC, (m.time IS NULL), m.time ASC, m.id ASC');
 }
 
 export async function getLatestWeek(): Promise<number | null> {
@@ -479,7 +483,7 @@ export async function getMatchesByWeek(week: number): Promise<AdminMatchRow[]> {
 			 JOIN teams at ON at.id = m.away_team_id
 			 LEFT JOIN venues v ON v.id = m.venue_id
 			 WHERE m.week = ?
-			 ORDER BY m.time ASC, m.date ASC`,
+			 ORDER BY m.date ASC, (m.time IS NULL), m.time ASC, m.id ASC`,
 		)
 		.bind(week)
 		.all();
@@ -604,7 +608,13 @@ export async function getTeamConflicts(
 	return res.results as unknown as ConflictMatch[];
 }
 
-/** Other matches at the same venue and time on `date`. */
+/**
+ * Other matches at the same venue and time on `date`.
+ *
+ * Only single-court venues can be double-booked: multi-court pavilions may host
+ * several games at once, and the "Por determinar" placeholder is not a real
+ * court, so neither ever fires a conflict.
+ */
 export async function getVenueConflicts(
 	matchId: number,
 	venueId: number | null,
@@ -612,6 +622,13 @@ export async function getVenueConflicts(
 	time: string | null,
 ): Promise<ConflictMatch[]> {
 	if (!venueId || !time) return [];
+
+	const venue = (await env.lle_pwa
+		.prepare('SELECT single_court FROM venues WHERE id = ?')
+		.bind(venueId)
+		.first()) as { single_court: number } | null;
+	if (!venue?.single_court) return [];
+
 	const res = await env.lle_pwa
 		.prepare(
 			`SELECT m.id, m.week, m.date, m.time,

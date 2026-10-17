@@ -4,13 +4,21 @@ import ScoreBadge from './ScoreBadge.astro';
 import VenueLink from './VenueLink.astro';
 import MovedBadge from './MovedBadge.astro';
 import type { MatchRow } from '../lib/db';
-import { formatTime, movedLabel, teamOutcome } from '../lib/format';
+import { formatTime, formatTurno, isTbdVenue, movedLabel, teamOutcome } from '../lib/format';
 
 interface Props {
 	matches: MatchRow[];
 }
 
 const { matches } = Astro.props;
+
+/**
+ * Unconfirmed venues show the turno label instead of the raw hour, since the
+ * time is only a pre-structured slot until the admin confirms it. The label is
+ * trusted HTML (superscript ordinal), so it is rendered with `set:html`.
+ */
+const timeLabel = (m: MatchRow) =>
+	isTbdVenue(m.venue_maps) ? formatTurno(m.time) || formatTime(m.time) : formatTime(m.time);
 ---
 
 <div class="mt-3 grid gap-3 sm:grid-cols-2">
@@ -28,7 +36,7 @@ const { matches } = Astro.props;
 						m.venue_name && 'min-h-4',
 					]}
 				>
-					{formatTime(m.time) && <span>{formatTime(m.time)}</span>}
+					{timeLabel(m) && <span set:html={timeLabel(m)} />}
 					{movedLabel(m.original_date, m.date) && (
 						<MovedBadge originalDate={m.original_date} date={m.date} size="sm" />
 					)}
