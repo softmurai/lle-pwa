@@ -9,7 +9,9 @@ const staggerRows = () => {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-	// Orden de tablas: clic en una columna con [data-sort]
+	// Orden de tablas: clic en una columna con [data-sort].
+	// Ciclo de tres estados: 1) más primero (desc, ↑) 2) menos primero (asc, ↓)
+	// 3) vuelta al orden original de la tabla (dorsal / clasificación), sin icono.
 	document
 		.querySelectorAll<HTMLTableElement>('table[data-sortable]')
 		.forEach((table) => {
@@ -18,35 +20,72 @@ document.addEventListener('DOMContentLoaded', () => {
 			const headers = Array.from(
 				table.querySelectorAll<HTMLTableCellElement>('thead th[data-sort]'),
 			);
-			headers.forEach((th, i) => {
+
+			// Orden con el que se renderizó la tabla en el servidor, para poder
+			// restaurarlo en el tercer clic (y las posiciones, si las hay).
+			const originalRows = Array.from(body.querySelectorAll<HTMLTableRowElement>('tr'));
+			const originalPositions = originalRows.map((row) => {
+				const el = row.querySelector<HTMLElement>('[data-pos]');
+				return el ? el.textContent : null;
+			});
+
+			const setState = (th: HTMLTableCellElement, state: '' | 'asc' | 'desc') => {
+				headers.forEach((h) => {
+					delete h.dataset.dir;
+					h.classList.remove('sorted-asc', 'sorted-desc');
+				});
+				if (!state) return;
+				th.dataset.dir = state;
+				th.classList.add(state === 'asc' ? 'sorted-asc' : 'sorted-desc');
+			};
+
+			const renumber = () => {
+				Array.from(body.querySelectorAll<HTMLTableRowElement>('tr')).forEach((row, i) => {
+					const pos = row.querySelector('[data-pos]');
+					if (pos) pos.textContent = String(i + 1);
+				});
+			};
+
+			const restore = () => {
+				originalRows.forEach((row, i) => {
+					body.appendChild(row);
+					const pos = row.querySelector('[data-pos]');
+					if (pos) pos.textContent = originalPositions[i] ?? String(i + 1);
+				});
+			};
+
+			headers.forEach((th, headerIndex) => {
 				th.addEventListener('click', () => {
-					const asc = th.dataset.dir !== 'asc';
-					const rows = Array.from(
-						body.querySelectorAll<HTMLTableRowElement>('tr'),
-					);
+					const state = th.dataset.dir;
+					const next: '' | 'asc' | 'desc' =
+						state === 'desc' ? 'asc' : state === 'asc' ? '' : 'desc';
+
+					if (!next) {
+						restore();
+						setState(th, '');
+						return;
+					}
+
+					// Explicit data-col wins so a table can expose only some columns
+					// (e.g. the box score keeps "Jugador" unsorted).
+					const col = th.dataset.col ?? String(headerIndex);
+					const rows = Array.from(body.querySelectorAll<HTMLTableRowElement>('tr'));
+					const direction = next === 'asc' ? 1 : -1;
+
 					rows.sort((a, b) => {
-						const ra = a.dataset['col' + i] ?? '';
-						const rb = b.dataset['col' + i] ?? '';
+						const ra = a.dataset['col' + col] ?? '';
+						const rb = b.dataset['col' + col] ?? '';
 						const na = Number(ra);
 						const nb = Number(rb);
 						const aN = ra !== '' && !Number.isNaN(na);
 						const bN = rb !== '' && !Number.isNaN(nb);
-						let cmp: number;
-						if (aN && bN) cmp = na - nb;
-						else cmp = ra.localeCompare(rb, 'es', { numeric: true });
-						return asc ? cmp : -cmp;
+						const cmp =
+							aN && bN ? na - nb : ra.localeCompare(rb, 'es', { numeric: true });
+						return direction * cmp;
 					});
-					rows.forEach((row, pos) => {
-						body.appendChild(row);
-						const posEl = row.querySelector('[data-pos]');
-						if (posEl) (posEl as HTMLElement).textContent = String(pos + 1);
-					});
-					headers.forEach((h) => {
-						h.dataset.dir = '';
-						h.classList.remove('sorted-asc', 'sorted-desc');
-					});
-					th.dataset.dir = asc ? 'asc' : 'desc';
-					th.classList.add(asc ? 'sorted-asc' : 'sorted-desc');
+					rows.forEach((row) => body.appendChild(row));
+					renumber();
+					setState(th, next);
 				});
 			});
 		});

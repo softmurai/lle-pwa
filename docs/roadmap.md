@@ -45,15 +45,13 @@ progresses.
 - A photo of the win posted when the tournament finishes.
 - **Not started until confirmed.** This is an explicit gate.
 
-### 6. Invert sort-arrow direction on sortable tables `planned`
+### 6. Invert sort-arrow direction on sortable tables `done` — 2026-10-17
 
-- Currently (`src/styles/global.css` + `src/lib/table-interactions.ts`) an ascending
-  sort shows **↑**, so the arrow points up while the lowest values are at the top —
-  counterintuitive.
-- Change so **↑ = "most first"** (descending) and **↓ = ascending** (fewest first);
-  swap the icons in `global.css`.
-- Affects all `[data-sortable]` tables: Clasificación, Jugadores, and the roster
-  table on `equipos/[id]`.
+- Done as part of #26: **↑ = “most first”** (descending) and **↓ = ascending**
+  (fewest first) in `src/styles/global.css`; a third click on the same header
+  clears the sort and restores the table's default order.
+- Applies to all `[data-sortable]` tables: Clasificación, Estadísticas, the
+  roster table on `equipos/[id]`, and the box score on `partidos/[id]`.
 
 ### 7. Last games played + next fixtures on team page `planned`
 
@@ -399,6 +397,57 @@ confirmed, and the admin conflict check respects venue capacity.
   same turno without a warning — the guardrail only exists for single-court
   venues. Team clashes (same teams, same date) and special-date warnings are
   unchanged.
+
+### 25. Info / "Sobre nosotros" page — rules, socials, league history `planned`
+
+New public, read-only page for the non-competitive content that doesn't belong on
+Inicio/Calendario/Clasificación, reachable from a link on Inicio.
+
+Content:
+
+- **Reglamento** — competition rules: format, points (V=2, D=1, E=1), forfeits,
+  tie-breakers, acta/scoresheet process, rescheduling + rain dates.
+- **Redes sociales** — league Instagram / WhatsApp / YouTube links.
+- **Histórico** — palmarés of previous leagues (and cup winners once #4 lands).
+  Hand-maintained static list for now; switch to archived seasons after #21.
+- **Organización / contacto** — who runs the league and where to ask questions.
+
+Implementation notes:
+
+- Static Astro page (`src/pages/info.astro`; slug TBD with `/sobre-nosotros`),
+  reusing `Layout.astro`; no new tables, no DB queries.
+- Entry point on `src/pages/index.astro`: a CTA card/link at the bottom
+  («Sobre la liga →»). Keep the 5-item desktop nav and BottomNav untouched
+  (already full on mobile); expose it from the footer instead.
+- Own `title`/`description` for SEO; all copy in Spanish.
+
+Open choices: final slug, whether the reglamento is inline text or a downloadable
+PDF, and whether history stays hand-maintained or is generated from #21.
+
+### 26. Table header sorting + tooltips `done` — 2026-10-17
+
+Reworked the shared table behaviour (`src/lib/table-interactions.ts`,
+`src/lib/th-tooltip.ts`).
+
+- **Three-state sort.** First click on a column → **most first** (desc, ↑);
+  second → **least first** (asc, ↓); third → restore the server-rendered order
+  (dorsal / standings) with no arrow. Only one header is active at a time;
+  `[data-pos]` values are renumbered on sort and restored on reset.
+- **Partial columns.** Headers may set an explicit `data-col`; otherwise the
+  index among `[data-sort]` headers is used (keeps existing tables unchanged).
+- **Box score sorted.** `/partidos/[id]` team tables are now `data-sortable`;
+  the six stat columns (P, 2P, 3P, TL, TLI, Fal) sort, “Jugador” does not, and
+  the `<tfoot>` Totales row stays fixed. Each team sorts independently.
+- **No cursor change.** Removed `cursor-help` from `ThTooltip` and
+  `cursor: pointer` from `th[data-sort]`.
+- **Portalled tooltip.** The acronym tip is a single `div.th-tip` appended to
+  `<body>` and positioned with fixed coordinates (never clipped by the tables'
+  `overflow-x-auto`), clamped to the viewport. It opens **above** the header on
+  hover, focus and touch, flipping below only when there is no room. Any other
+  tap closes it, as do Escape, scroll and resize. The whole `<th>` is the
+  trigger.
+- Imported globally from `src/layouts/Layout.astro`, so Inicio (which uses
+  `ThTooltip` without `table-interactions`) behaves the same.
 
 ---
 

@@ -26,29 +26,59 @@ html {
 }
 
 th[data-sort] {
-	cursor: pointer;
 	user-select: none;
 }
 th[data-sort]::after {
 	content: '';
 }
-th[data-sort].sorted-asc::after {
+th[data-sort].sorted-desc::after {
 	content: ' ↑';
 }
-th[data-sort].sorted-desc::after {
+th[data-sort].sorted-asc::after {
 	content: ' ↓';
 }
 
-thead th:nth-last-child(-n + 2) .group > .absolute {
-	left: auto;
-	right: 0;
-	translate: none;
+/*
+ * Tooltip for table headers, portalled to <body> by src/lib/th-tooltip.ts so it
+ * is never clipped by the tables' overflow-x containers. Sits above the header
+ * (it only flips below when there is no room on screen).
+ */
+.th-tip {
+	position: fixed;
+	z-index: 60;
+	max-width: min(16rem, calc(100vw - 1rem));
+	transform: translateX(-50%);
+	border-radius: 0.25rem;
+	background-color: var(--color-gray-900, #111827);
+	padding: 0.25rem 0.5rem;
+	font-size: 11px;
+	font-weight: 500;
+	line-height: 1.25;
+	color: #fff;
+	white-space: nowrap;
+	pointer-events: none;
+	opacity: 0;
+	transition: opacity 0.15s ease;
 }
-
-thead th:nth-last-child(-n + 2) .group > .absolute > .absolute {
-	left: auto;
-	right: 0.5rem;
-	translate: none;
+.th-tip[data-visible='true'] {
+	opacity: 1;
+}
+.th-tip::after {
+	content: '';
+	position: absolute;
+	left: var(--tip-arrow-x, 50%);
+	width: 0;
+	height: 0;
+	border: 4px solid transparent;
+	transform: translateX(-50%);
+}
+.th-tip[data-placement='above']::after {
+	top: 100%;
+	border-top-color: var(--color-gray-900, #111827);
+}
+.th-tip[data-placement='below']::after {
+	bottom: 100%;
+	border-bottom-color: var(--color-gray-900, #111827);
 }
 
 /* Pull-to-refresh (mobile PWA only, see src/lib/pull-to-refresh.ts) */

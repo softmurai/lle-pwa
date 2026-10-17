@@ -61,6 +61,7 @@ const cardUrl = new URL('/icon-512.png', Astro.url.origin);
 
 <script>
 	import '../lib/pull-to-refresh';
+	import '../lib/th-tooltip';
 
 	if ('serviceWorker' in navigator && import.meta.env.PROD) {
 		window.addEventListener('load', () => {
