@@ -393,6 +393,10 @@ confirmed, and the admin conflict check respects venue capacity.
   UMH**, **Toscar Interior** (multi-court pavilions) and **Por determinar**
   (not a real court) are set to 0 and never block. `getVenueConflicts()` checks
   the flag before querying.
+- **La Marina (`done` 2026-10-19).** `migrations/0021_add_la_marina_venue.sql`
+  adds the sixth real venue — **La Marina**, short name **Marina**, with its
+  Google Maps URL. It is single-court (`single_court = 1`), so it follows the
+  same one-game-per-date+time guardrail as the venues above.
 - **Accepted trade-off:** two provisional ("Por determinar") games can share the
   same turno without a warning — the guardrail only exists for single-court
   venues. Team clashes (same teams, same date) and special-date warnings are
