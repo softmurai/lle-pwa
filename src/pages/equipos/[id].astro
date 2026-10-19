@@ -17,6 +17,8 @@ const statColumns = [
 	{ label: 'Pts/PJ', align: 'text-right' },
 	{ label: '2P', align: 'text-right' },
 	{ label: '3P', align: 'text-right' },
+	{ label: 'TL', align: 'text-right' },
+	{ label: 'TLI', align: 'text-right' },
 	{ label: 'TL%', align: 'text-right' },
 	{ label: 'Faltas', align: 'text-right' },
 ];
@@ -140,8 +142,10 @@ const statColumns = [
 											data-col4={p.avg_points ?? ''}
 											data-col5={p.fg_made}
 											data-col6={p.three_made}
-											data-col7={p.ft_pct ?? ''}
-											data-col8={p.fouls}
+											data-col7={p.ft_made}
+											data-col8={p.ft_att}
+											data-col9={p.ft_pct ?? ''}
+											data-col10={p.fouls}
 										>
 											<td class="px-3 py-2.5 font-medium">{p.name}</td>
 											<td class="px-3 py-2.5 text-right tabular-nums text-gray-500">
@@ -159,6 +163,12 @@ const statColumns = [
 											</td>
 											<td class="px-3 py-2.5 text-right tabular-nums">
 												{p.three_made}
+											</td>
+											<td class="px-3 py-2.5 text-right tabular-nums">
+												{p.ft_made}
+											</td>
+											<td class="px-3 py-2.5 text-right text-gray-500 tabular-nums">
+												{p.ft_att}
 											</td>
 											<td class="px-3 py-2.5 text-right tabular-nums">
 												{p.ft_pct !== null ? p.ft_pct : '–'}
