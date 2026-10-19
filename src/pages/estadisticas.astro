@@ -1,27 +1,30 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import ThTooltip from '../components/ThTooltip.astro';
-import { getAllPlayers } from '../lib/db';
+import { getPlayerLeaders, getTeams } from '../lib/db';
 
-const players = await getAllPlayers();
+const players = await getPlayerLeaders();
+const teams = (await getTeams()).map((team) => ({
+	id: team.id,
+	short_name: team.short_name,
+}));
+
+const tabs = [
+	{ key: 'points', label: 'Anotadores' },
+	{ key: 'three', label: 'Triplistas' },
+	{ key: 'fg', label: 'Tiros de 2' },
+	{ key: 'ft', label: 'Tiros libres' },
+	{ key: 'fouls', label: 'Faltas' },
+] as const;
 ---
 
 <Layout
 	title="Estadísticas · Liga Elche Baloncesto"
-	description="Busca a cualquier jugador de la Liga Elche Baloncesto y consulta sus estadísticas."
+	description="Líderes de estadísticas de la Liga Elche Baloncesto: anotadores, triples, tiros de dos, tiros libres y faltas."
 >
 	<div class="mx-auto max-w-5xl px-4 pt-4 pb-6">
 		<h1 class="font-display text-2xl tracking-wide">Estadísticas</h1>
-		<p class="mt-1 text-sm text-gray-500">
-			Busca a cualquier jugador de la liga.
-		</p>
-
-		<input
-			data-filter-for="#players-table"
-			type="search"
-			placeholder="Buscar por nombre…"
-			class="mt-4 w-full max-w-md rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm shadow-sm outline-none transition focus:border-[#641B24] focus:ring-2 focus:ring-[#641B24]/20"
-		/>
+		<p class="mt-1 text-sm text-gray-500">Líderes de estadísticas en la liga.</p>
 
 		{
 			players.length === 0 ? (
@@ -31,37 +34,229 @@ const players = await getAllPlayers();
 					No hay jugadores registrados.
 				</div>
 			) : (
-				<div class="mt-4 overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
-					<table
-						data-sortable
-						data-animate-rows
-						id="players-table"
-						class="w-full text-sm"
-					>
-						<thead>
-							<tr
-								class="border-b border-gray-200 text-left text-xs uppercase tracking-wide text-gray-500"
+				<>
+					<div class="mt-4">
+						<div
+							class="-mx-4 flex gap-2 overflow-x-auto px-4 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 [&::-webkit-scrollbar]:hidden"
+							role="group"
+							aria-label="Filtros de estadísticas"
+						>
+							{tabs.map((tab) => (
+								<button
+									type="button"
+									class="stat-pill shrink-0 rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-xs font-semibold tracking-wide whitespace-nowrap text-gray-600 uppercase transition hover:border-[#641B24]/40"
+									data-stat-tab={tab.key}
+									data-active={tab.key === 'points' ? '' : undefined}
+									aria-pressed={tab.key === 'points' ? 'true' : 'false'}
+								>
+									{tab.label}
+								</button>
+							))}
+
+							<button
+								type="button"
+								class="team-pill relative shrink-0 overflow-hidden rounded-full border border-gray-200 bg-white py-1.5 pr-2.5 pl-3.5 text-xs font-semibold tracking-wide whitespace-nowrap text-gray-600 uppercase transition"
+								data-team-toggle
+								aria-haspopup="listbox"
+								aria-expanded="false"
+								aria-label="Filtrar por equipo"
 							>
-								<th data-sort class="px-3 py-3 font-medium">Nombre</th>
-								<th data-sort class="px-3 py-3 font-medium">Equipo</th>
-								<th data-sort class="px-3 py-3 font-medium text-right">Dorsal</th>
-								<th data-sort class="px-3 py-3 font-medium text-right"><ThTooltip label="PJ" /></th>
-								<th data-sort class="px-3 py-3 font-medium text-right">Puntos</th>
-							</tr>
-						</thead>
-						<tbody>
-							{
-								players.map((p) => (
+								<span
+									class="team-pill-fill pointer-events-none absolute inset-0"
+									aria-hidden="true"
+								></span>
+								<span class="relative flex items-center gap-1.5">
+									<span data-team-label>Liga</span>
+									<svg
+										class="team-pill-chevron"
+										width="12"
+										height="12"
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke="currentColor"
+										stroke-width="2.5"
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										aria-hidden="true"
+									>
+										<path d="m6 9 6 6 6-6"></path>
+									</svg>
+								</span>
+							</button>
+						</div>
+
+						<ul
+							class="team-menu fixed z-50 min-w-[10rem] overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-lg"
+							data-team-menu
+							role="listbox"
+							aria-label="Equipo"
+							hidden
+						>
+							<li
+								role="option"
+								tabindex="-1"
+								data-team-value=""
+								aria-selected="true"
+								class="team-option flex cursor-pointer items-center px-3 py-2 text-sm text-gray-700 outline-none hover:bg-[#641B24]/5 focus:bg-[#641B24]/5"
+							>
+								Liga
+							</li>
+							{teams.map((team) => (
+								<li
+									role="option"
+									tabindex="-1"
+									data-team-value={team.id}
+									aria-selected="false"
+									class="team-option flex cursor-pointer items-center px-3 py-2 text-sm text-gray-700 outline-none hover:bg-[#641B24]/5 focus:bg-[#641B24]/5"
+								>
+									{team.short_name}
+								</li>
+							))}
+						</ul>
+					</div>
+
+					<div class="mt-4 overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
+						<table data-sortable id="players-table" class="w-full text-sm">
+							<thead>
+								<tr class="border-b border-gray-200 text-left text-xs tracking-wide text-gray-500 uppercase">
+									<th class="w-10 px-2 py-3 text-center font-medium">Pos</th>
+									<th data-sort data-col="name" class="px-3 py-3 font-medium">
+										Nombre
+									</th>
+									<th
+										data-sort
+										data-col="points"
+										data-stat-col="points"
+										class="px-3 py-3 text-right font-medium"
+									>
+										<ThTooltip label="PTS" />
+									</th>
+									<th
+										data-sort
+										data-col="three"
+										data-stat-col="three"
+										class="hidden px-3 py-3 text-right font-medium"
+									>
+										<ThTooltip label="3P" />
+									</th>
+									<th
+										data-sort
+										data-col="fg"
+										data-stat-col="fg"
+										class="hidden px-3 py-3 text-right font-medium"
+									>
+										<ThTooltip label="2P" />
+									</th>
+									<th
+										data-sort
+										data-col="ft"
+										data-stat-col="ft"
+										class="hidden px-3 py-3 text-right font-medium"
+									>
+										<ThTooltip label="TL" />
+									</th>
+									<th
+										data-sort
+										data-col="ft_att"
+										data-stat-col="ft"
+										class="hidden px-3 py-3 text-right font-medium"
+									>
+										<ThTooltip label="TLI" />
+									</th>
+									<th
+										data-sort
+										data-col="ft_pct"
+										data-stat-col="ft"
+										class="hidden px-3 py-3 text-right font-medium"
+									>
+										<ThTooltip label="TL%" />
+									</th>
+									<th
+										data-sort
+										data-col="fouls"
+										data-stat-col="fouls"
+										class="hidden px-3 py-3 text-right font-medium"
+									>
+										<ThTooltip label="Fal" />
+									</th>
+									<th data-sort data-col="games" class="px-3 py-3 text-right font-medium">
+										<ThTooltip label="PJ" />
+									</th>
+									<th data-sort data-col="team" class="px-3 py-3 font-medium">
+										Equipo
+									</th>
+								</tr>
+							</thead>
+							<tbody>
+								{players.map((p, i) => (
 									<tr
 										class="border-b border-gray-100 transition-colors last:border-0 hover:bg-[#641B24]/5"
-										data-search={`${p.name} ${p.number ?? ''}`}
-										data-col0={p.name}
-										data-col1={p.team_name}
-										data-col2={p.number ?? ''}
-										data-col3={p.games}
-										data-col4={p.points}
+										data-colname={p.name}
+										data-colpoints={p.points}
+										data-colthree={p.three_made}
+										data-colfg={p.fg_made}
+										data-colft={p.ft_made}
+										data-colft_att={p.ft_att}
+										data-colft_pct={p.ft_pct ?? ''}
+										data-colfouls={p.fouls}
+										data-colgames={p.games}
+										data-colteam={p.team_name}
+										data-pj={p.games}
+										data-team-id={p.team_id}
 									>
-										<td class="px-3 py-2.5 font-medium">{p.name}</td>
+										<td
+											data-pos
+											class="px-2 py-2.5 text-center text-gray-400 tabular-nums"
+										>
+											{i + 1}
+										</td>
+										<td class="px-3 py-2.5 font-medium">
+											<span class="text-gray-400">{p.number ?? '–'}</span>{' '}
+											{p.name}
+										</td>
+										<td
+											data-stat-col="points"
+											class="px-3 py-2.5 text-right font-medium tabular-nums"
+										>
+											{p.points}
+										</td>
+										<td
+											data-stat-col="three"
+											class="hidden px-3 py-2.5 text-right tabular-nums"
+										>
+											{p.three_made}
+										</td>
+										<td
+											data-stat-col="fg"
+											class="hidden px-3 py-2.5 text-right tabular-nums"
+										>
+											{p.fg_made}
+										</td>
+										<td
+											data-stat-col="ft"
+											class="hidden px-3 py-2.5 text-right tabular-nums"
+										>
+											{p.ft_made}
+										</td>
+										<td
+											data-stat-col="ft"
+											class="hidden px-3 py-2.5 text-right text-gray-500 tabular-nums"
+										>
+											{p.ft_att}
+										</td>
+										<td
+											data-stat-col="ft"
+											class="hidden px-3 py-2.5 text-right text-gray-500 tabular-nums"
+										>
+											{p.ft_pct != null ? `${p.ft_pct}%` : '–'}
+										</td>
+										<td
+											data-stat-col="fouls"
+											class="hidden px-3 py-2.5 text-right tabular-nums"
+										>
+											{p.fouls}
+										</td>
+										<td class="px-3 py-2.5 text-right tabular-nums">{p.games}</td>
 										<td class="px-3 py-2.5">
 											<a
 												href={`/equipos/${p.team_id}`}
@@ -70,24 +265,86 @@ const players = await getAllPlayers();
 												{p.team_name}
 											</a>
 										</td>
-										<td class="px-3 py-2.5 text-right tabular-nums text-gray-500">
-											{p.number ?? '–'}
-										</td>
-										<td class="px-3 py-2.5 text-right tabular-nums">{p.games}</td>
-										<td class="px-3 py-2.5 text-right font-medium tabular-nums">
-											{p.points}
-										</td>
 									</tr>
-								))
-							}
-						</tbody>
-					</table>
-				</div>
+								))}
+							</tbody>
+						</table>
+					</div>
+
+					<div class="mt-4 flex justify-center">
+						<button
+							type="button"
+							data-show-more
+							class="rounded-full border border-gray-200 bg-white px-6 py-2 text-sm font-semibold tracking-wide text-[#641B24] uppercase shadow-sm transition hover:border-[#641B24]/40"
+						>
+							Ver más
+						</button>
+					</div>
+				</>
 			)
 		}
 	</div>
 </Layout>
 
+<style>
+	.stat-pill[data-active] {
+		background-image: linear-gradient(
+			to bottom right,
+			#641b24 0%,
+			#3d2340 50%,
+			#142e5d 100%
+		);
+		border-color: transparent;
+		color: #fff;
+		box-shadow: 0 1px 2px rgb(0 0 0 / 0.08);
+	}
+
+	/* The gradient can't be transitioned directly, so the team pill fades in
+	   an absolutely positioned gradient layer instead. */
+	.team-pill-fill {
+		background-image: linear-gradient(
+			to bottom right,
+			#641b24 0%,
+			#3d2340 50%,
+			#142e5d 100%
+		);
+		opacity: 0;
+		transition: opacity 150ms ease-out;
+	}
+
+	.team-pill[data-active] {
+		border-color: transparent;
+		color: #fff;
+		box-shadow: 0 1px 2px rgb(0 0 0 / 0.08);
+	}
+
+	.team-pill[data-active] .team-pill-fill {
+		opacity: 1;
+	}
+
+	.team-pill-chevron {
+		transition: transform 200ms ease-out;
+	}
+
+	.team-pill[data-open] .team-pill-chevron {
+		transform: rotate(180deg);
+	}
+
+	/* Headless-UI-style fade + slide-down for the dropdown. */
+	.team-menu {
+		opacity: 0;
+		transform: translateY(-4px);
+		transition:
+			opacity 100ms ease-out,
+			transform 100ms ease-out;
+	}
+
+	.team-menu[data-open] {
+		opacity: 1;
+		transform: translateY(0);
+	}
+</style>
+
 <script>
-	import '../lib/table-interactions';
+	import '../lib/estadisticas';
 </script>

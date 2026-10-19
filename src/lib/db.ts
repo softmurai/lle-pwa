@@ -263,7 +263,7 @@ export async function getRoster(teamId: number): Promise<PlayerStatRow[]> {
 	return res.results as unknown as PlayerStatRow[];
 }
 
-export interface PlayerSearchRow {
+export interface PlayerLeaderRow {
 	id: number;
 	name: string;
 	number: string | null;
@@ -271,23 +271,36 @@ export interface PlayerSearchRow {
 	team_name: string;
 	games: number;
 	points: number;
+	three_made: number;
+	fg_made: number;
+	ft_made: number;
+	ft_att: number;
+	ft_pct: number | null;
+	fouls: number;
 }
 
-export async function getAllPlayers(): Promise<PlayerSearchRow[]> {
+export async function getPlayerLeaders(): Promise<PlayerLeaderRow[]> {
 	const res = await env.lle_pwa
 		.prepare(
 			`SELECT p.id, p.name, p.number,
 			        t.id AS team_id, t.name AS team_name,
 			        COUNT(ms.id) AS games,
-			        COALESCE(SUM(ms.points), 0) AS points
+			        COALESCE(SUM(ms.points), 0) AS points,
+			        COALESCE(SUM(ms.three_pt_made), 0) AS three_made,
+			        COALESCE(SUM(ms.field_goals_made), 0) AS fg_made,
+			        COALESCE(SUM(ms.free_throws_made), 0) AS ft_made,
+			        COALESCE(SUM(ms.free_throws_attempted), 0) AS ft_att,
+			        ROUND(SUM(ms.free_throws_made) * 100.0 /
+			          NULLIF(SUM(ms.free_throws_attempted), 0), 2) AS ft_pct,
+			        COALESCE(SUM(ms.fouls), 0) AS fouls
 			 FROM players p
 			 JOIN teams t ON t.id = p.team_id
 			 LEFT JOIN match_stats ms ON ms.player_id = p.id
 			 GROUP BY p.id, p.name, p.number, t.id, t.name
-			 ORDER BY p.name COLLATE NOCASE`,
+			 ORDER BY points DESC, games DESC, p.name COLLATE NOCASE`,
 		)
 		.all();
-	return res.results as unknown as PlayerSearchRow[];
+	return res.results as unknown as PlayerLeaderRow[];
 }
 
 export interface MatchDetail {

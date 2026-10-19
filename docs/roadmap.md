@@ -19,17 +19,34 @@ progresses.
 
 ## Backlog
 
-### 1. Estadísticas — rework of "Jugadores" `in progress`
+### 1. Estadísticas — rework of "Jugadores" `done` — 2026-10-19
 
 - Rename the "Jugadores" section/page and bottom-nav tab to "Estadísticas". `done`
   - Route moved to `/estadisticas` (file `src/pages/estadisticas.astro`); `/jugadores` 301-redirects to it.
   - Bottom-nav + desktop-nav labels updated; icon switched to Tabler `chart-bar`.
-- Leaderboards (new queries in `src/lib/db.ts`):
-  - Puntos (score leaders)
-  - Triples (3PM leaders)
-  - Tiros libres (FTM / FTA / %)
-  - Faltas cometidas
-- "Líderes por equipo" view (team aggregates).
+- Leaderboards `done` — 2026-10-19. The search input was replaced by stat tabs + a
+  team filter; the page now renders a single client-side leaderboard table:
+  - Tabs: **ANOTADORES** (PTS), **TRIPLISTAS** (3P), **TIROS DE 2** (2P, made only —
+    attempts aren't recorded), **TIROS LIBRES** (TL / TLI / TL%, all three sortable),
+    **FALTAS** (most fouls first). Default tab: anotadores.
+  - Pills use the three-color brand gradient (red → purple → navy, `to-br`, same as the
+    logo/favicon); the active tab is gradient-filled, the rest are outlined.
+  - **EQUIPO** pill dropdown (last in the tab row, short team names) filters to the whole
+    league (**«Liga»**, neutral outline) or one team (pill fills with the brand gradient).
+    The menu is portaled to `<body>` (so the scrolling pill row can't clip it) and uses a
+    Headless-UI-style fade + slide-down. The old "Líderes por equipo" team-aggregate idea is
+    superseded by this filter.
+  - Columns: **NOMBRE** (dorsal + name, as on `/partidos/[id]`) → selected stat → **PJ** →
+    **EQUIPO** (links to `/equipos/[id]`). Player names are not links.
+  - Sort: the three-state header sort (↑ desc → ↓ asc → reset) is kept; reset restores the
+    current tab's default ranking. Ties break on **PJ desc**, then name A→Z.
+  - FT% is rounded to 2 decimals; `–` when a player has no attempts.
+  - Pagination is client-side: 10 rows on every screen size, **VER MÁS** reveals +10.
+  - A leading **POS** column shows the leaderboard position (leader = 1); when the list is
+    sorted ascending it counts down from the last position instead of 1, 2, 3. It reflects
+    the full filtered list (independent of the visible window).
+  - Data: `getPlayerLeaders()` in `src/lib/db.ts` (all aggregates in one query);
+    `src/lib/estadisticas.ts` handles tabs, filter, sort and the visible-row window.
 - **Excluded:** "fouls recibidos" — not tracked in the existing data (confirmed).
 
 ### 3. Mini-calendar at top of "Calendario" `planned` — React island
